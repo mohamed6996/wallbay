@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:wallbay/constants.dart';
 import 'package:flutter/foundation.dart';
+import 'package:wallbay/nav_bar_tabs/favorites_tab.dart';
+import 'package:wallbay/nav_bar_tabs/collections_tab.dart';
+import 'package:wallbay/nav_bar_tabs/main_feed_tab.dart';
 import 'package:wallbay/screens/manage_account.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:uni_links/uni_links.dart';
-import 'package:wallbay/access_token.dart';
+import 'package:wallbay/model/access_token.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
@@ -15,6 +18,19 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final Key keyMainFeed = PageStorageKey('mainFeed');
+  final Key keyCollections = PageStorageKey('collections');
+  final Key keyFavorites = PageStorageKey('favorites');
+
+  MainFeedTab mainFeedTab;
+  CollectionsTab collectionsTab;
+  FavoritesTab favoritesTab;
+
+  final PageStorageBucket bucket = PageStorageBucket();
+  List<Widget> pages;
+  Widget currentPage;
+  int currentTab = 0;
+
   StreamSubscription _sub;
   String msg = "";
 
@@ -22,6 +38,13 @@ class _HomeState extends State<Home> {
   initState() {
     super.initState();
     initUniLinks();
+    mainFeedTab = MainFeedTab(key: keyMainFeed);
+    collectionsTab = CollectionsTab(key: keyCollections);
+    favoritesTab = FavoritesTab(key: keyFavorites);
+
+    pages = [mainFeedTab,collectionsTab, favoritesTab ];
+
+    currentPage = mainFeedTab;
   }
 
   @override
@@ -37,8 +60,32 @@ class _HomeState extends State<Home> {
         title: Text("Wallbay"),
         elevation: defaultTargetPlatform == TargetPlatform.android ? 5.0 : 0.0,
       ),
-      body: Center(
-        child: Text(msg),
+      body: PageStorage(
+        child: currentPage,
+        bucket: bucket,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentTab,
+        onTap: (int index) {
+          setState(() {
+            currentTab = index;
+            currentPage = pages[index];
+          });
+        },
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            title: Text('Home'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.layers),
+            title: Text("Collections"),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_border),
+            title: Text("Favorite"),
+          ),
+        ],
       ),
       drawer: _buildDrawer(),
     );

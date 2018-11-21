@@ -16,6 +16,9 @@ class Constants {
       "public+read_user+write_user+read_photos+write_photos+write_likes+read_collections+write_collections";
 
 
+ static final BASE_URL = "https://api.unsplash.com/";
+
+
 
   // Shared preferences
   static final OAUTH_LOGED_IN = "oauth.loggedin";

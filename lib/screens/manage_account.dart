@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:flutter/services.dart';
-import 'package:wallbay/access_token.dart';
+import 'package:wallbay/model/access_token.dart';
 import 'package:wallbay/constants.dart';
 import 'dart:async';
 
