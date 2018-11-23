@@ -12,12 +12,43 @@ import 'package:uni_links/uni_links.dart';
 import 'package:wallbay/model/access_token.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Home extends StatefulWidget {
+class Home extends StatelessWidget {
   @override
-  _HomeState createState() => _HomeState();
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: _initSharedPref(),
+        builder: (context, AsyncSnapshot<SharedPreferences> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.done:
+              if (snapshot.hasData) {
+                return MainTabs(snapshot.data);
+              } else {
+                return Container();
+              }
+              break;
+            default:
+              return Container();
+          }
+        });
+  }
+
+  Future<SharedPreferences> _initSharedPref() async {
+    return SharedPreferences.getInstance();
+  }
 }
 
-class _HomeState extends State<Home> {
+class MainTabs extends StatefulWidget {
+  final SharedPreferences preferences;
+
+//
+//
+  MainTabs(this.preferences);
+
+  @override
+  _MainTabsState createState() => _MainTabsState();
+}
+
+class _MainTabsState extends State<MainTabs> {
   final Key keyMainFeed = PageStorageKey('mainFeed');
   final Key keyCollections = PageStorageKey('collections');
   final Key keyFavorites = PageStorageKey('favorites');
@@ -32,19 +63,12 @@ class _HomeState extends State<Home> {
   int currentTab = 0;
 
   StreamSubscription _sub;
-  String msg = "";
 
   @override
   initState() {
     super.initState();
+    _initTabs();
     initUniLinks();
-    mainFeedTab = MainFeedTab(key: keyMainFeed);
-    collectionsTab = CollectionsTab(key: keyCollections);
-    favoritesTab = FavoritesTab(key: keyFavorites);
-
-    pages = [mainFeedTab,collectionsTab, favoritesTab ];
-
-    currentPage = mainFeedTab;
   }
 
   @override
@@ -137,17 +161,9 @@ class _HomeState extends State<Home> {
     Map<String, dynamic> map = json.decode(response.body);
     var accessToken = AccessToken.fromJson(map);
     _saveAccessTokenToPrefs(accessToken);
-    setState(() {
-      msg = accessToken.access_token;
-    });
   }
 
   Future<Null> initUniLinks() async {
-    var prefs = await SharedPreferences.getInstance();
-    var accessToken = prefs.getString(Constants.OAUTH_ACCESS_TOKEN);
-    setState(() {
-      msg = accessToken == null ? "" : accessToken;
-    });
     getUriLinksStream().listen((Uri uri) {
       if (uri != null) {
         setState(() {
@@ -165,10 +181,19 @@ class _HomeState extends State<Home> {
   }
 
   void _saveAccessTokenToPrefs(AccessToken body) async {
-    var prefs = await SharedPreferences.getInstance();
+    widget.preferences
+        .setString(Constants.OAUTH_ACCESS_TOKEN, body.access_token);
+    widget.preferences.setString(Constants.OAUTH_TOKEN_TYPE, body.token_type);
+    widget.preferences.setBool(Constants.OAUTH_LOGED_IN, true);
+  }
 
-    prefs.setBool(Constants.OAUTH_LOGED_IN, true);
-    prefs.setString(Constants.OAUTH_ACCESS_TOKEN, body.access_token);
-    prefs.setString(Constants.OAUTH_TOKEN_TYPE, body.token_type);
+  Future<void> _initTabs() async {
+    mainFeedTab = MainFeedTab(keyMainFeed, widget.preferences);
+    collectionsTab = CollectionsTab(key: keyCollections);
+    favoritesTab = FavoritesTab(key: keyFavorites);
+
+    pages = [mainFeedTab, collectionsTab, favoritesTab];
+
+    currentPage = mainFeedTab;
   }
 }

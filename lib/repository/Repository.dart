@@ -24,4 +24,8 @@ abstract class Repository {
   //
   // */
   Future<List<PhotoModel>> fetchPhotos(int pageNumber);
+
+  Future<void> likePhoto(String photoId);
+
+  Future<void> unlikePhoto(String photoId);
 }

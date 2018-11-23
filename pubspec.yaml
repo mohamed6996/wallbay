@@ -36,6 +36,7 @@ dev_dependencies:
   flutter_advanced_networkimage: any
   flutter_spinkit: ^3.0.0
   color: any
+  dio: any
 
 
 # For information on the generic Dart part of this file, see the

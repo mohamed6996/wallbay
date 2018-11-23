@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wallbay/constants.dart';
 import 'package:wallbay/widgets/image_card.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:async/async.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:http/http.dart' as http;
 
-class MainFeedTab extends StatefulWidget {
-  MainFeedTab({Key key}) : super(key: key);
+class MainFeedTab extends StatelessWidget {
   final _memoizer = AsyncMemoizer();
+  final SharedPreferences sharedPreferences;
 
-  @override
-  MainFeedTabState createState() {
-    return new MainFeedTabState();
-  }
-}
+  MainFeedTab(Key key, this.sharedPreferences) : super(key: key);
 
-class MainFeedTabState extends State<MainFeedTab> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -32,24 +30,27 @@ class MainFeedTabState extends State<MainFeedTab> {
               if (snapshot.hasError) {
                 return Center(child: Text("Error: ${snapshot.error}"));
               } else {
-                return ImageList(models: snapshot.data);
+                return ImageList(
+                  models: snapshot.data,
+                  sharedPreferences: sharedPreferences,
+                );
               }
           }
         });
   }
 
   _fetchData() async {
-    return widget._memoizer.runOnce(() async {
-      return await PhotoRepository().fetchPhotos(1);
-      // return 'REMOTE DATA';
+    return _memoizer.runOnce(() async {
+      return PhotoRepository(sharedPreferences).fetchPhotos(1);
     });
   }
 }
 
 class ImageList extends StatefulWidget {
   final List<PhotoModel> models;
+  final SharedPreferences sharedPreferences;
 
-  ImageList({Key key, this.models}) : super(key: key);
+  ImageList({Key key, this.models, this.sharedPreferences}) : super(key: key);
 
   @override
   _ImageListState createState() => _ImageListState();
@@ -57,11 +58,11 @@ class ImageList extends StatefulWidget {
 
 class _ImageListState extends State<ImageList> {
   List<PhotoModel> models;
+  PhotoRepository _photoRepo;
+
   ScrollController _scrollController = new ScrollController();
   bool isPerformingRequest = false;
   int currentPage = 1;
-
-  bool isLiked = false, isFollowing = false;
 
   @override
   void initState() {
@@ -73,6 +74,8 @@ class _ImageListState extends State<ImageList> {
       }
     });
 
+    // initSharedPref();
+    _photoRepo = new PhotoRepository(widget.sharedPreferences);
     super.initState();
   }
 
@@ -95,15 +98,37 @@ class _ImageListState extends State<ImageList> {
             itemCount: models.length,
             itemBuilder: (context, int index) {
               if (index == models.length - 1) {
-                return _buildProgressIndicator();
+                print(models[index].liked_by_user);
+                return SpinKitThreeBounce(
+                  color: Colors.purple,
+                  size: 30.0,
+                );
               } else {
                 return ImageCard(
-                    models[index].regularPhotoUrl,
-                    models[index].mediumProfilePhotoUrl,
-                    models[index].name,
-                    models[index].color);
+                  models[index],
+                  () => onFavoritePressed(index),
+                );
               }
             }));
+  }
+
+  onFavoritePressed(int index) async {
+    final model = models[index];
+    String photoId = model.photoId;
+
+    if (!model.liked_by_user) {
+      _photoRepo.likePhoto(photoId).then((_) {
+        setState(() {
+          model.liked_by_user = true;
+        });
+      });
+    } else {
+      _photoRepo.unlikePhoto(photoId).then((_) {
+        setState(() {
+          model.liked_by_user = false;
+        });
+      });
+    }
   }
 
   void _fetchMoreData() async {
@@ -112,19 +137,11 @@ class _ImageListState extends State<ImageList> {
         isPerformingRequest = true;
         currentPage++;
       });
-      List<PhotoModel> newModels =
-          await new PhotoRepository().fetchPhotos(currentPage);
+      List<PhotoModel> newModels = await _photoRepo.fetchPhotos(currentPage);
       setState(() {
         models.addAll(newModels);
         isPerformingRequest = false;
       });
     }
-  }
-
-  Widget _buildProgressIndicator() {
-    return SpinKitThreeBounce(
-      color: Colors.purple,
-      size: 30.0,
-    );
   }
 }
