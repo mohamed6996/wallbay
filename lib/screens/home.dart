@@ -40,8 +40,6 @@ class Home extends StatelessWidget {
 class MainTabs extends StatefulWidget {
   final SharedPreferences preferences;
 
-//
-//
   MainTabs(this.preferences);
 
   @override
@@ -62,7 +60,7 @@ class _MainTabsState extends State<MainTabs> {
   Widget currentPage;
   int currentTab = 0;
 
-  StreamSubscription _sub;
+ // StreamSubscription _sub;  //todo
 
   @override
   initState() {
@@ -74,7 +72,7 @@ class _MainTabsState extends State<MainTabs> {
   @override
   void dispose() {
     super.dispose();
-    _sub.cancel();
+  //  _sub.cancel();
   }
 
   @override
@@ -181,8 +179,7 @@ class _MainTabsState extends State<MainTabs> {
   }
 
   void _saveAccessTokenToPrefs(AccessToken body) async {
-    widget.preferences
-        .setString(Constants.OAUTH_ACCESS_TOKEN, body.access_token);
+    widget.preferences.setString(Constants.OAUTH_ACCESS_TOKEN, body.access_token);
     widget.preferences.setString(Constants.OAUTH_TOKEN_TYPE, body.token_type);
     widget.preferences.setBool(Constants.OAUTH_LOGED_IN, true);
   }
@@ -190,7 +187,7 @@ class _MainTabsState extends State<MainTabs> {
   Future<void> _initTabs() async {
     mainFeedTab = MainFeedTab(keyMainFeed, widget.preferences);
     collectionsTab = CollectionsTab(key: keyCollections);
-    favoritesTab = FavoritesTab(key: keyFavorites);
+    favoritesTab = FavoritesTab(keyFavorites,widget.preferences);
 
     pages = [mainFeedTab, collectionsTab, favoritesTab];
 

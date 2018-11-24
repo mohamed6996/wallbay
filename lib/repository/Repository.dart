@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:wallbay/model/me_model.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/model/photo_response.dart';
 
@@ -24,6 +27,10 @@ abstract class Repository {
   //
   // */
   Future<List<PhotoModel>> fetchPhotos(int pageNumber);
+
+  Future<List<PhotoModel>> fetchFavoritePhotos(int pageNumber,String userName);
+
+  Future<MeModel> getMe();
 
   Future<void> likePhoto(String photoId);
 
