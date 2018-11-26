@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wallbay/constants.dart';
-import 'package:wallbay/widgets/image_card.dart';
-import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:async/async.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:http/http.dart' as http;
 import 'package:wallbay/widgets/image_list.dart';
 
 class MainFeedTab extends StatelessWidget {

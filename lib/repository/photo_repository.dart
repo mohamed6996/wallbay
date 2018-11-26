@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallbay/constants.dart';
+import 'package:wallbay/model/collection_model.dart';
+import 'package:wallbay/model/collection_response.dart';
 import 'package:wallbay/model/me_model.dart';
 import 'package:wallbay/model/me_response.dart';
 import 'package:wallbay/repository/Repository.dart';
@@ -29,7 +31,7 @@ class PhotoRepository extends Repository {
 
     if (_sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false) {
       // https://api.unsplash.com/photos with Authorization: Bearer ACCESS_TOKEN
-      photosUrl = Constants.BASE_URL + "photos";
+      photosUrl = Constants.BASE_URL + "photos/?page=$pageNumber";
       Options options = new Options();
       options.headers = map;
 
@@ -43,14 +45,6 @@ class PhotoRepository extends Repository {
       list = PhotoResponseList.fromJson(response.data);
     }
 
-//    final url = Constants.BASE_URL +
-//        "photos/" +
-//        "?client_id=${Constants.clientId}&page=$pageNumber";
-//
-//    var res = await http.get(url);
-//    print(res.body);
-//    PhotoResponseList list = PhotoResponseList.fromJson(jsonDecode(res.body));
-
     List<PhotoModel> models = list.responseList
         .map((photoResponse) => PhotoModel.fromPhotoResponse(photoResponse))
         .toList();
@@ -61,7 +55,6 @@ class PhotoRepository extends Repository {
   @override
   Future<List<PhotoModel>> fetchFavoritePhotos(
       int pageNumber, String userName) async {
-
     String photosUrl = "";
 
     var accessToken =
@@ -81,7 +74,6 @@ class PhotoRepository extends Repository {
     List<PhotoModel> models = list.responseList
         .map((photoResponse) => PhotoModel.fromPhotoResponse(photoResponse))
         .toList();
-
 
     print(models.length);
 
@@ -145,5 +137,24 @@ class PhotoRepository extends Repository {
     var response = await dio.delete(unlikeUrl, options: options);
 
     return null;
+  }
+
+  @override
+  Future<List<CollectionModel>> fetchCollections(int pageNumber) async {
+    Dio dio = new Dio();
+
+    String collectionsUrl = Constants.BASE_URL +
+        "collections/?client_id=${Constants.clientId}&page=$pageNumber";
+
+    var response = await dio.get(collectionsUrl);
+    CollectionResponseList list =
+        CollectionResponseList.fromJson(response.data);
+
+    List<CollectionModel> models = list.collectionList
+        .map((collectionResponse) =>
+            CollectionModel.fromCollectionResponse(collectionResponse))
+        .toList();
+
+    return models;
   }
 }

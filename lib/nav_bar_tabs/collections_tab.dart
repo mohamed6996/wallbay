@@ -1,28 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wallbay/repository/photo_repository.dart';
+import 'package:async/async.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:wallbay/widgets/collection_list.dart';
 
-class CollectionsTab extends StatefulWidget {
-  CollectionsTab({Key key}) : super(key: key);
+class CollectionsTab extends StatelessWidget {
+  final _memoizer = AsyncMemoizer();
+  final SharedPreferences sharedPreferences;
 
-  @override
-  CollectionsTabState createState() => CollectionsTabState();
-}
+  CollectionsTab(Key key, this.sharedPreferences) : super(key: key);
 
-class CollectionsTabState extends State<CollectionsTab> {
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemExtent: 250.0,
-      itemBuilder: (context, index) => Container(
-        padding: EdgeInsets.all(10.0),
-        child: Material(
-          elevation: 4.0,
-          borderRadius: BorderRadius.circular(5.0),
-          color: index % 2 == 0 ? Colors.cyan : Colors.deepOrange,
-          child: Center(
-            child: Text(index.toString()),
-          ),
-        ),
-      ),
-    );
+    return FutureBuilder(
+        future: _fetchData(),
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return Center(
+                  child: SpinKitHourGlass(
+                    color: Colors.purple,
+                  ));
+              break;
+            default:
+              if (snapshot.hasError) {
+                return Center(child: Text("Error: ${snapshot.error}"));
+              } else {
+                return CollectionList(
+                  models: snapshot.data,sharedPreferences: sharedPreferences
+                );
+              }
+          }
+        });
+  }
+
+  _fetchData() async {
+    return _memoizer.runOnce(() async {
+      return PhotoRepository(sharedPreferences).fetchCollections(1);
+    });
   }
 }

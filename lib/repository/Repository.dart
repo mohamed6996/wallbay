@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:wallbay/model/collection_model.dart';
 import 'package:wallbay/model/me_model.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/model/photo_response.dart';
@@ -35,4 +36,8 @@ abstract class Repository {
   Future<void> likePhoto(String photoId);
 
   Future<void> unlikePhoto(String photoId);
+
+  Future<List<CollectionModel>> fetchCollections(int pageNumber);
+
+
 }
