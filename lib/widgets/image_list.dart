@@ -3,6 +3,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
+import 'package:wallbay/screens/photo_details_screen.dart';
 import 'package:wallbay/widgets/image_card.dart';
 
 class ImageList extends StatefulWidget {
@@ -70,9 +71,12 @@ class _ImageListState extends State<ImageList> {
                   size: 30.0,
                 );
               } else {
-                return ImageCard(
-                  models[index],
-                      () => onFavoritePressed(index),
+                return GestureDetector(
+                  onTap: (){onImagePressed( models[index]);},
+                  child: ImageCard(
+                    models[index],
+                        () => onFavoritePressed(index),
+                  ),
                 );
               }
             }));
@@ -128,5 +132,11 @@ class _ImageListState extends State<ImageList> {
         isPerformingRequest = false;
       });
     }
+  }
+
+  onImagePressed(PhotoModel model) {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => PhotoDetailsScreen(model,_photoRepo,widget.sharedPreferences)));
+
   }
 }

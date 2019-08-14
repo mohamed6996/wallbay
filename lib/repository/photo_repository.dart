@@ -6,6 +6,8 @@ import 'package:wallbay/model/collection_model.dart';
 import 'package:wallbay/model/collection_response.dart';
 import 'package:wallbay/model/me_model.dart';
 import 'package:wallbay/model/me_response.dart';
+import 'package:wallbay/model/photo_details_model.dart';
+import 'package:wallbay/model/photo_details_response.dart';
 import 'package:wallbay/repository/Repository.dart';
 import 'package:wallbay/constants.dart';
 import 'package:wallbay/model/photo_model.dart';
@@ -156,5 +158,58 @@ class PhotoRepository extends Repository {
         .toList();
 
     return models;
+  }
+
+  @override
+  Future<List<CollectionModel>> fetchUserCollections(
+      int pageNumber, String userName) async {
+    Dio dio = new Dio();
+
+    String collectionsUrl = Constants.BASE_URL +
+        "users/$userName/collections/?client_id=${Constants.clientId}&page=$pageNumber";
+
+    var response = await dio.get(collectionsUrl);
+    CollectionResponseList list =
+        CollectionResponseList.fromJson(response.data);
+
+    List<CollectionModel> models = list.collectionList
+        .map((collectionResponse) =>
+            CollectionModel.fromCollectionResponse(collectionResponse))
+        .toList();
+
+    return models;
+  }
+
+  @override
+  Future<List<PhotoModel>> fetchUserPhotos(
+      int pageNumber, String userName) async {
+    Dio dio = new Dio();
+
+    String userPhotosUrl = Constants.BASE_URL +
+        "users/$userName/photos/?client_id=${Constants.clientId}&page=$pageNumber";
+
+    var response = await dio.get(userPhotosUrl);
+
+    var list = PhotoResponseList.fromJson(response.data);
+
+    List<PhotoModel> models = list.responseList
+        .map((photoResponse) => PhotoModel.fromPhotoResponse(photoResponse))
+        .toList();
+
+    return models;
+  }
+
+  @override
+  Future<PhotoDetailsModel> fetchPhotoDetails(String id) async {
+    Dio dio = new Dio();
+
+    String userPhotosUrl =
+        Constants.BASE_URL + "photos/$id/?client_id=${Constants.clientId}";
+
+    var response = await dio.get(userPhotosUrl);
+
+    var res = PhotoDetails.fromJson(response.data);
+
+    return PhotoDetailsModel.fromPhotoResponse(res);
   }
 }

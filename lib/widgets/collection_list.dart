@@ -8,8 +8,13 @@ import 'package:wallbay/widgets/collection_card.dart';
 class CollectionList extends StatefulWidget {
   final List<CollectionModel> models;
   final SharedPreferences sharedPreferences;
+  final bool userCollection;
 
-  CollectionList({Key key, this.models, this.sharedPreferences})
+  CollectionList(
+      {Key key,
+      this.models,
+      this.sharedPreferences,
+      this.userCollection = false})
       : super(key: key);
 
   @override
@@ -52,24 +57,10 @@ class _CollectionListState extends State<CollectionList> {
 
   Widget _buildListView(
       List<CollectionModel> models, ScrollController scrollController) {
-
-//    return Container(
-//      child: GridView.builder(
-//          itemCount: models.length +1,
-//          gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
-//          itemBuilder: (context, int index) {
-//            if (index == models.length) {
-//              return SpinKitThreeBounce(
-//                color: Colors.purple,
-//                size: 30.0,
-//              );
-//            } else {
-//              return CollectionCard(models[index]);
-//            }
-//          }),
-//    );
     return Container(
         child: ListView.builder(
+            scrollDirection:
+                widget.userCollection ? Axis.horizontal : Axis.vertical,
             controller: scrollController,
             itemCount: models.length + 1,
             itemBuilder: (context, int index) {
@@ -79,7 +70,7 @@ class _CollectionListState extends State<CollectionList> {
                   size: 30.0,
                 );
               } else {
-                return CollectionCard(models[index]);
+                return CollectionCard(models[index],widget.userCollection);
               }
             }));
   }

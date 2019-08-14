@@ -18,33 +18,37 @@ class ImageCard extends StatelessWidget {
                 fit: BoxFit.cover, image: new NetworkImage(url))));
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return new Card(
       child: Column(
         children: <Widget>[
-          new CachedNetworkImage(
+          CachedNetworkImage(
             fit: BoxFit.fill,
-            width: double.infinity,
-            // height: 250.0,
             imageUrl: photoModel.regularPhotoUrl,
-            placeholder: SizedBox(
-              width: double.infinity,
-              height: 250.0,
-              child: DecoratedBox(
-                child: Center(
-                    child: CircularProgressIndicator(
-                  valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
-                  strokeWidth: 0.5,
-                )),
-                decoration: BoxDecoration(
-                    color: Color(
-                        int.parse("0xFF${photoModel.color.substring(1)}"))),
+            errorWidget: (context,String s,o){
+              return Icon(Icons.error);
+            },
+            placeholder: (context, String err) {
+              return SizedBox(
+                width: double.infinity,
+                height: 250.0,
+                child: DecoratedBox(
+                    child: Center(
+                        child: CircularProgressIndicator(
+                      valueColor:
+                          new AlwaysStoppedAnimation<Color>(Colors.white),
+                      strokeWidth: 0.5,
+                    )),
+                    decoration: BoxDecoration(
+                        color: Color(int.parse(
+                            "0xFF${photoModel.color.substring(1)}")))),
                 //https://stackoverflow.com/questions/50081213/how-do-i-use-hexadecimal-color-strings-in-flutter
                 // use subString to remove the #
-              ),
-            ),
-            errorWidget: new Icon(Icons.error),
+              );
+            },
           ),
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

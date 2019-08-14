@@ -2,6 +2,7 @@ import 'package:wallbay/model/photo_response.dart';
 
 class PhotoModel {
   String photoId;
+  String createdAt;
   int width;
   int height;
   bool liked_by_user;
@@ -16,6 +17,7 @@ class PhotoModel {
 
   PhotoModel(
       {this.photoId,
+      this.createdAt,
       this.width,
       this.height,
       this.liked_by_user,
@@ -28,6 +30,7 @@ class PhotoModel {
 
   PhotoModel.fromPhotoResponse(PhotoResponse response)
       : photoId = response.id,
+        createdAt = response.created_at,
         width = response.width,
         height = response.height,
         liked_by_user = response.liked_by_user,
