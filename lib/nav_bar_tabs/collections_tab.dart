@@ -13,26 +13,29 @@ class CollectionsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: _fetchData(),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-              return Center(
-                  child: SpinKitHourGlass(
-                    color: Colors.purple,
-                  ));
-              break;
-            default:
-              if (snapshot.hasError) {
-                return Center(child: Text("Error: ${snapshot.error}"));
-              } else {
-                return CollectionList(
-                  models: snapshot.data,sharedPreferences: sharedPreferences
-                );
-              }
-          }
-        });
+    return Scaffold(
+      appBar: AppBar(title: Text('Collections')),
+      body: FutureBuilder(
+          future: _fetchData(),
+          builder: (context, snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Center(
+                    child: SpinKitHourGlass(
+                      color: Colors.purple,
+                    ));
+                break;
+              default:
+                if (snapshot.hasError) {
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                } else {
+                  return CollectionList(
+                      models: snapshot.data,sharedPreferences: sharedPreferences
+                  );
+                }
+            }
+          }),
+    );
   }
 
   _fetchData() async {

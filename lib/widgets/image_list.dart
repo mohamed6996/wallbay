@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/screens/photo_details_screen.dart';
+import 'package:wallbay/utils/shared_prefs.dart';
 import 'package:wallbay/widgets/image_card.dart';
 
 class ImageList extends StatefulWidget {
@@ -14,10 +15,10 @@ class ImageList extends StatefulWidget {
 
   ImageList(
       {Key key,
-        this.models,
-        this.sharedPreferences,
-        this.isFavoriteTab,
-        this.userName})
+      this.models,
+      this.sharedPreferences,
+      this.isFavoriteTab,
+      this.userName})
       : super(key: key);
 
   @override
@@ -55,7 +56,11 @@ class _ImageListState extends State<ImageList> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildListView(models, _scrollController);
+    int layout = SharedPrefs.loadSavedLayout() ?? 0;
+    if (layout == 0)
+      return _buildListView(models, _scrollController);
+    else
+      return _buildGridView(models, _scrollController);
   }
 
   Widget _buildListView(
@@ -72,10 +77,42 @@ class _ImageListState extends State<ImageList> {
                 );
               } else {
                 return GestureDetector(
-                  onTap: (){onImagePressed( models[index]);},
+                  onTap: () {
+                    onImagePressed(models[index]);
+                  },
                   child: ImageCard(
                     models[index],
-                        () => onFavoritePressed(index),
+                    () => onFavoritePressed(index),
+                  ),
+                );
+              }
+            }));
+  }
+
+  Widget _buildGridView(
+      List<PhotoModel> models, ScrollController scrollController) {
+    return Container(
+        child: GridView.builder(
+            controller: scrollController,
+            itemCount: models.length + 1,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: .55,
+            ),
+            itemBuilder: (context, index) {
+              if (index == models.length) {
+                return SpinKitThreeBounce(
+                  color: Colors.purple,
+                  size: 30.0,
+                );
+              } else {
+                return GestureDetector(
+                  onTap: () {
+                    onImagePressed(models[index]);
+                  },
+                  child: GridItemView(
+                    models[index],
+                    () => onFavoritePressed(index),
                   ),
                 );
               }
@@ -112,7 +149,7 @@ class _ImageListState extends State<ImageList> {
         newModels = await _photoRepo.fetchPhotos(currentPage);
       } else {
         newModels =
-        await _photoRepo.fetchFavoritePhotos(currentPage, widget.userName);
+            await _photoRepo.fetchFavoritePhotos(currentPage, widget.userName);
       }
       // check if return data is empty
       if (newModels.isEmpty) {
@@ -136,7 +173,9 @@ class _ImageListState extends State<ImageList> {
 
   onImagePressed(PhotoModel model) {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => PhotoDetailsScreen(model,_photoRepo,widget.sharedPreferences)));
-
+        context,
+        MaterialPageRoute(
+            builder: (context) => PhotoDetailsScreen(
+                model, _photoRepo, widget.sharedPreferences)));
   }
 }

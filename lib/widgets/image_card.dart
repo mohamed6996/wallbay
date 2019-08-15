@@ -8,18 +8,6 @@ class ImageCard extends StatelessWidget {
 
   ImageCard(this.photoModel, this.onFavoritePressed);
 
-  Widget _circleImage(String url) {
-    return Container(
-        width: 35.0,
-        height: 35.0,
-        decoration: new BoxDecoration(
-            shape: BoxShape.circle,
-            image: new DecorationImage(
-                fit: BoxFit.cover, image: new NetworkImage(url))));
-  }
-
-
-
   @override
   Widget build(BuildContext context) {
     return new Card(
@@ -28,7 +16,7 @@ class ImageCard extends StatelessWidget {
           CachedNetworkImage(
             fit: BoxFit.fill,
             imageUrl: photoModel.regularPhotoUrl,
-            errorWidget: (context,String s,o){
+            errorWidget: (context, String s, o) {
               return Icon(Icons.error);
             },
             placeholder: (context, String err) {
@@ -82,6 +70,73 @@ class ImageCard extends StatelessWidget {
               ])
         ],
       ),
+    );
+  }
+
+  Widget _circleImage(String url) {
+    return Container(
+        width: 35.0,
+        height: 35.0,
+        decoration: new BoxDecoration(
+            shape: BoxShape.circle,
+            image: new DecorationImage(
+                fit: BoxFit.cover, image: new NetworkImage(url))));
+  }
+}
+
+class GridItemView extends StatelessWidget {
+  final PhotoModel photoModel;
+  final VoidCallback onFavoritePressed;
+
+  GridItemView(this.photoModel, this.onFavoritePressed);
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.all(4),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: CachedNetworkImage(
+              fit: BoxFit.cover,
+              imageUrl: photoModel.regularPhotoUrl,
+              errorWidget: (context, String s, o) {
+                return Icon(Icons.error);
+              },
+              placeholder: (context, String err) {
+                return SizedBox(
+                  width: double.infinity,
+                  height: 250.0,
+                  child: DecoratedBox(
+                      child: Center(
+                          child: CircularProgressIndicator(
+                        valueColor:
+                            new AlwaysStoppedAnimation<Color>(Colors.white),
+                        strokeWidth: 0.5,
+                      )),
+                      decoration: BoxDecoration(
+                          color: Color(int.parse(
+                              "0xFF${photoModel.color.substring(1)}")))),
+                  //https://stackoverflow.com/questions/50081213/how-do-i-use-hexadecimal-color-strings-in-flutter
+                  // use subString to remove the #
+                );
+              },
+            ),
+          ),
+        ),
+
+        Positioned(
+            bottom: 0,
+            right: 0,
+            child: IconButton(
+                icon: photoModel.liked_by_user
+                    ? Icon(Icons.favorite, color: Colors.red)
+                    : Icon(Icons.favorite_border, color: Colors.white),
+                onPressed: onFavoritePressed))
+
+      ],
     );
   }
 }

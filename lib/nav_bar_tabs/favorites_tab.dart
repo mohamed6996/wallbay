@@ -14,47 +14,50 @@ class FavoritesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: _fetchMe(),
-        builder: (context, AsyncSnapshot<MeModel> userNameSnapshot) {
-          switch (userNameSnapshot.connectionState) {
-            case ConnectionState.waiting:
-              return Center(
-                  child: SpinKitHourGlass(
-                color: Colors.purple,
-              ));
-              break;
-            default:
-              if (userNameSnapshot.hasError) {
-                return Center(child: Text("Error: ${userNameSnapshot.error}"));
-              } else {
-                return FutureBuilder(
-                    future: _fetchData(userNameSnapshot.data.username),
-                    builder: (context, snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return Center(
-                              child: SpinKitHourGlass(
-                            color: Colors.purple,
-                          ));
-                          break;
-                        default:
-                          if (snapshot.hasData) {
-                            return ImageList(
-                              models: snapshot.data,
-                              sharedPreferences: sharedPreferences,
-                              isFavoriteTab: true,
-                              userName: userNameSnapshot.data.username,
-                            );
-                          } else {
+    return Scaffold(
+      appBar: AppBar(title: Text('Favorits')),
+      body: FutureBuilder(
+          future: _fetchMe(),
+          builder: (context, AsyncSnapshot<MeModel> userNameSnapshot) {
+            switch (userNameSnapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Center(
+                    child: SpinKitHourGlass(
+                      color: Colors.purple,
+                    ));
+                break;
+              default:
+                if (userNameSnapshot.hasError) {
+                  return Center(child: Text("Error: ${userNameSnapshot.error}"));
+                } else {
+                  return FutureBuilder(
+                      future: _fetchData(userNameSnapshot.data.username),
+                      builder: (context, snapshot) {
+                        switch (snapshot.connectionState) {
+                          case ConnectionState.waiting:
                             return Center(
-                                child: Text("Error: ${snapshot.error}"));
-                          }
-                      }
-                    });
-              }
-          }
-        });
+                                child: SpinKitHourGlass(
+                                  color: Colors.purple,
+                                ));
+                            break;
+                          default:
+                            if (snapshot.hasData) {
+                              return ImageList(
+                                models: snapshot.data,
+                                sharedPreferences: sharedPreferences,
+                                isFavoriteTab: true,
+                                userName: userNameSnapshot.data.username,
+                              );
+                            } else {
+                              return Center(
+                                  child: Text("Error: ${snapshot.error}"));
+                            }
+                        }
+                      });
+                }
+            }
+          }),
+    );
   }
 
   Future<MeModel> _fetchMe() async {
