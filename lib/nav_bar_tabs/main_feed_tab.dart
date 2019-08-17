@@ -4,8 +4,7 @@ import 'package:wallbay/repository/photo_repository.dart';
 import 'package:async/async.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:wallbay/widgets/image_list.dart';
-import 'package:material_search/material_search.dart';
-import 'package:loader_search_bar/loader_search_bar.dart';
+
 
 class MainFeedTab extends StatelessWidget {
   final _memoizer = AsyncMemoizer();

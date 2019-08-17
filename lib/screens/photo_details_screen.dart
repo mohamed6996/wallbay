@@ -1,14 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wallbay/model/photo_details_model.dart';
+import 'package:unicorndial/unicorndial.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
-import 'package:wallbay/widgets/user_collection_list.dart';
-import 'package:wallbay/widgets/user_photo_list.dart';
-import 'package:share/share.dart';
+
 
 class PhotoDetailsScreen extends StatefulWidget {
   final PhotoModel model;
@@ -22,44 +18,79 @@ class PhotoDetailsScreen extends StatefulWidget {
 }
 
 class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
+  var childButtons = List<UnicornButton>();
+
+  void fabDialChildren() {
+    childButtons.add(UnicornButton(
+        hasLabel: true,
+        labelText: "Info",
+        labelBackgroundColor: Colors.black,
+        labelColor: Colors.white,
+        labelHasShadow: false,
+        currentButton: FloatingActionButton(
+          heroTag: "chat",
+          backgroundColor: Colors.black,
+          mini: true,
+          child: Icon(Icons.info_outline, color: Colors.white),
+          onPressed: () async {
+//            FirebaseUser user = await widget._homePageBE.getUser();
+//            Navigator.of(context).push(MaterialPageRoute(
+//                builder: (context) => ChatPage(user, user.uid)));
+          },
+        )));
+
+    childButtons.add(UnicornButton(
+        hasLabel: true,
+        labelText: "Set as wallpaper",
+        labelBackgroundColor: Colors.black,
+        labelColor: Colors.white,
+        labelHasShadow: false,
+        currentButton: FloatingActionButton(
+          heroTag: "sell",
+          backgroundColor: Colors.black,
+          mini: true,
+          child: Icon(Icons.wallpaper, color: Colors.white),
+          onPressed: () {
+//            Navigator.of(context)
+//                .push(MaterialPageRoute(builder: (context) => SellPageFE()));
+          },
+        )));
+
+    childButtons.add(UnicornButton(
+        hasLabel: true,
+        labelText: "Download",
+        labelBackgroundColor: Colors.black,
+        labelColor: Colors.white,
+        labelHasShadow: false,
+        currentButton: FloatingActionButton(
+          heroTag: "download",
+          backgroundColor: Colors.black,
+          mini: true,
+          child: Icon(Icons.file_download, color: Colors.white),
+          onPressed: () {
+//            Navigator.of(context)
+//                .push(MaterialPageRoute(builder: (context) => SellPageFE()));
+          },
+        )));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fabDialChildren();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: SpeedDial(
-        animatedIcon: AnimatedIcons.menu_close,
-        // animatedIconTheme: IconThemeData(size: 22.0),
-       // curve: Curves.bounceIn,
-        overlayColor: Colors.black,
-        overlayOpacity: 0.5,
-        // heroTag: 'speed-dial-hero-tag',
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        // elevation: 8.0,
-        shape: CircleBorder(),
-        children: [
-          SpeedDialChild(
-              child: Icon(Icons.arrow_downward),
-              backgroundColor: Colors.red,
-              label: 'Download',
-              labelStyle: TextStyle(fontSize: 15),
-              onTap: () => print('FIRST CHILD')),
-          SpeedDialChild(
-            child: Icon(Icons.wallpaper),
-            backgroundColor: Colors.blue,
-            label: 'Set as wallpaper',
-            labelStyle: TextStyle(fontSize: 15),
-            onTap: () => print('SECOND CHILD'),
-          ),
-          SpeedDialChild(
-            child: Icon(
-              Icons.info_outline,
-            ),
-            backgroundColor: Colors.green,
-            label: 'Info',
-            labelStyle: TextStyle(fontSize: 15),
-            onTap: () => print('THIRD CHILD'),
-          ),
-        ],
+      floatingActionButton: Theme(
+        data: ThemeData(
+            accentIconTheme: IconThemeData(color: Colors.white),
+            accentColor: Colors.orange),
+        child: UnicornDialer(
+            orientation: UnicornOrientation.VERTICAL,
+            parentButton: Icon(Icons.menu),
+            childButtons: childButtons),
       ),
       body: Stack(
         children: <Widget>[
@@ -76,12 +107,10 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
               height: 85,
               width: MediaQuery.of(context).size.width,
               child: Container(
-                color: Colors.black.withOpacity(0.4),
+                color: Colors.black.withOpacity(0.65),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 16, top: 0, bottom: 0),
                   child: Row(
-                    //  crossAxisAlignment: CrossAxisAlignment.start,
-                    // mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       _circleImage(widget.model.mediumProfilePhotoUrl),
                       Padding(padding: EdgeInsets.only(left: 10.0)),
@@ -91,9 +120,17 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                         children: <Widget>[
                           Text(
                             widget.model.name,
-                            style: TextStyle(fontSize: 12.0),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
                           ),
-                          Text('Unsplash.com')
+                          Padding(padding: EdgeInsets.all(2)),
+                          Text('Unsplash.com',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.normal))
                         ],
                       ),
                     ],
@@ -107,8 +144,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
 
   Widget _circleImage(String url) {
     return Container(
-        width: 60,
-        height: 60,
+        width: 40,
+        height: 40,
         decoration: new BoxDecoration(
             color: Colors.white,
             shape: BoxShape.circle,

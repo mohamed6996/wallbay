@@ -5,14 +5,12 @@ import 'package:wallbay/nav_bar_tabs/favorites_tab.dart';
 import 'package:wallbay/nav_bar_tabs/collections_tab.dart';
 import 'package:wallbay/nav_bar_tabs/main_feed_tab.dart';
 import 'package:wallbay/nav_bar_tabs/settings_tab.dart';
-import 'package:wallbay/screens/manage_account.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:uni_links/uni_links.dart';
 import 'package:wallbay/model/access_token.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:wallbay/utils/shared_prefs.dart';
 
