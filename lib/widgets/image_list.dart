@@ -11,6 +11,10 @@ class ImageList extends StatefulWidget {
   final List<PhotoModel> models;
   final SharedPreferences sharedPreferences;
   final isFavoriteTab;
+  final bool isCollectionPhotos;
+  final bool isSearch;
+  final String query;
+  final int collectionId;
   final String userName;
 
   ImageList(
@@ -18,6 +22,10 @@ class ImageList extends StatefulWidget {
       this.models,
       this.sharedPreferences,
       this.isFavoriteTab,
+      this.isCollectionPhotos = false,
+      this.isSearch = false,
+      this.query = '',
+      this.collectionId = 0,
       this.userName})
       : super(key: key);
 
@@ -25,7 +33,12 @@ class ImageList extends StatefulWidget {
   _ImageListState createState() => _ImageListState();
 }
 
-class _ImageListState extends State<ImageList> {
+class _ImageListState extends State<ImageList> with AutomaticKeepAliveClientMixin{
+
+  @override
+  bool get wantKeepAlive => true;
+
+
   List<PhotoModel> models;
   PhotoRepository _photoRepo;
 
@@ -67,6 +80,7 @@ class _ImageListState extends State<ImageList> {
       List<PhotoModel> models, ScrollController scrollController) {
     return Container(
         child: ListView.builder(
+            key: PageStorageKey("listKey"),
             controller: scrollController,
             itemCount: models.length + 1,
             itemBuilder: (context, int index) {
@@ -93,6 +107,7 @@ class _ImageListState extends State<ImageList> {
       List<PhotoModel> models, ScrollController scrollController) {
     return Container(
         child: GridView.builder(
+            key: PageStorageKey("gridKey"),
             controller: scrollController,
             itemCount: models.length + 1,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -145,11 +160,16 @@ class _ImageListState extends State<ImageList> {
         currentPage++;
       });
       List<PhotoModel> newModels;
-      if (!widget.isFavoriteTab) {
-        newModels = await _photoRepo.fetchPhotos(currentPage);
-      } else {
+      if (widget.isFavoriteTab) {
         newModels =
             await _photoRepo.fetchFavoritePhotos(currentPage, widget.userName);
+      } else if (widget.isCollectionPhotos) {
+        newModels = await _photoRepo.fetchCollectionPhotos(
+            currentPage, widget.collectionId);
+      } else if (widget.isSearch) {
+        newModels = await _photoRepo.searchPhotos(currentPage, widget.query);
+      } else {
+        newModels = await _photoRepo.fetchPhotos(currentPage);
       }
       // check if return data is empty
       if (newModels.isEmpty) {

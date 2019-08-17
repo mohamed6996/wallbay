@@ -1,6 +1,7 @@
 import 'package:wallbay/model/collection_response.dart';
 
-class CollectionModel {
+
+class CollectionModel  {
   int id;
   String title;
   String description;

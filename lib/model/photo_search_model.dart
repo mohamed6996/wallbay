@@ -1,7 +1,8 @@
 import 'package:wallbay/model/photo_response.dart';
+import 'package:wallbay/model/photo_search_response.dart';
 
 
-class PhotoModel {
+class PhotoSearchModel {
   String photoId;
   String createdAt;
   int width;
@@ -16,7 +17,7 @@ class PhotoModel {
   String name;
   String mediumProfilePhotoUrl;
 
-  PhotoModel(
+  PhotoSearchModel(
       {this.photoId,
       this.createdAt,
       this.width,
@@ -29,7 +30,7 @@ class PhotoModel {
       this.name,
       this.mediumProfilePhotoUrl});
 
-  PhotoModel.fromPhotoResponse(PhotoResponse response)
+  PhotoSearchModel.fromPhotoResponse(PhotoResponse response)
       : photoId = response.id,
         createdAt = response.created_at,
         width = response.width,

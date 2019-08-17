@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +9,8 @@ import 'package:wallbay/model/me_model.dart';
 import 'package:wallbay/model/me_response.dart';
 import 'package:wallbay/model/photo_details_model.dart';
 import 'package:wallbay/model/photo_details_response.dart';
+import 'package:wallbay/model/photo_search_model.dart';
+import 'package:wallbay/model/photo_search_response.dart';
 import 'package:wallbay/repository/Repository.dart';
 import 'package:wallbay/constants.dart';
 import 'package:wallbay/model/photo_model.dart';
@@ -53,6 +56,45 @@ class PhotoRepository extends Repository {
 
     return models;
   }
+
+
+  Future<List<PhotoModel>> searchPhotos(int pageNumber,String query) async {
+    String photosUrl = "";
+
+    var accessToken =
+        _sharedPreferences.getString(Constants.OAUTH_ACCESS_TOKEN) ?? "";
+    Map<String, String> map = {"Authorization": "Bearer $accessToken"};
+
+    Dio dio = new Dio();
+    PhotoSearchResponse list;
+
+    if (_sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false) {
+      photosUrl = Constants.BASE_URL + "search/photos/?page=$pageNumber&query=$query";
+      Options options = new Options();
+      options.headers = map;
+
+      var response = await dio.get(photosUrl, options: options);
+      list = PhotoSearchResponse.fromJson(response.data);
+    } else {
+      photosUrl = Constants.BASE_URL +
+          "search/photos/" +
+          "?client_id=${Constants.clientId}&page=$pageNumber&query=$query";
+      var response = await dio.get(photosUrl);
+      list = PhotoSearchResponse.fromJson(response.data);
+    }
+
+
+
+    List<PhotoModel> models = list.results
+        .map((photoResponse) => PhotoModel.fromPhotoResponse(photoResponse))
+        .toList();
+
+    print(models.length);
+
+
+    return models;
+  }
+
 
   @override
   Future<List<PhotoModel>> fetchFavoritePhotos(
@@ -155,6 +197,24 @@ class PhotoRepository extends Repository {
     List<CollectionModel> models = list.collectionList
         .map((collectionResponse) =>
             CollectionModel.fromCollectionResponse(collectionResponse))
+        .toList();
+
+    return models;
+  }
+
+
+  Future<List<PhotoModel>> fetchCollectionPhotos(int pageNumber,int collectionId)async{
+    Dio dio = new Dio();
+    PhotoResponseList list;
+
+    String collectionsUrl = Constants.BASE_URL +
+        "collections/$collectionId/photos/?client_id=${Constants.clientId}&page=$pageNumber";
+
+    var response = await dio.get(collectionsUrl);
+    list = PhotoResponseList.fromJson(response.data);
+
+    List<PhotoModel> models = list.responseList
+        .map((photoResponse) => PhotoModel.fromPhotoResponse(photoResponse))
         .toList();
 
     return models;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:wallbay/model/collection_model.dart';
+import 'package:wallbay/screens/collection_photos.dart';
 
 class CollectionCard extends StatelessWidget {
   final CollectionModel collectionModel;
@@ -10,46 +11,53 @@ class CollectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAliasWithSaveLayer,
-      // using stack make card loses its border radius, and setting the shape property not working
-      elevation: 5,
-      child: Stack(
-        children: <Widget>[
-          Container(
-            foregroundDecoration: BoxDecoration(
-              color: Colors.black.withAlpha(90),
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) =>
+                CollectionPhotos(collectionModel.id, collectionModel.title)));
+      },
+      child: Card(
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        // using stack make card loses its border radius, and setting the shape property not working
+        elevation: 5,
+        child: Stack(
+          children: <Widget>[
+            Container(
+              foregroundDecoration: BoxDecoration(
+                color: Colors.black.withAlpha(90),
+              ),
+              child: _imageView(userCollection),
             ),
-            child: _imageView(userCollection),
-          ),
-          Align(
-            alignment: Alignment.topLeft,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 15.0, 30.0, 0.0),
-                  child: Text(
-                    collectionModel.title,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: userCollection ? 12.0 : 22.0,
-                        fontWeight: FontWeight.bold),
+            Align(
+              alignment: Alignment.topLeft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8.0, 15.0, 30.0, 0.0),
+                    child: Text(
+                      collectionModel.title,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: userCollection ? 12.0 : 22.0,
+                          fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 4.0, 0.0, 0.0),
-                  child: Text(
-                    "${collectionModel.totalPhotos} photos",
-                    style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: userCollection ? 8.0 : 12.0),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8.0, 4.0, 0.0, 0.0),
+                    child: Text(
+                      "${collectionModel.totalPhotos} photos",
+                      style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: userCollection ? 8.0 : 12.0),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

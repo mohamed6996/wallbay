@@ -28,7 +28,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
       floatingActionButton: SpeedDial(
         animatedIcon: AnimatedIcons.menu_close,
         // animatedIconTheme: IconThemeData(size: 22.0),
-        curve: Curves.bounceIn,
+       // curve: Curves.bounceIn,
         overlayColor: Colors.black,
         overlayOpacity: 0.5,
         // heroTag: 'speed-dial-hero-tag',
