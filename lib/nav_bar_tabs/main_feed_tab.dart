@@ -5,7 +5,6 @@ import 'package:async/async.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:wallbay/widgets/image_list.dart';
 
-
 class MainFeedTab extends StatelessWidget {
   final _memoizer = AsyncMemoizer();
   final SharedPreferences sharedPreferences;
@@ -51,6 +50,9 @@ class MainFeedTab extends StatelessWidget {
             }
           }),
     );
+
+
+
   }
 
   _fetchData() async {

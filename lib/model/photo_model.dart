@@ -1,6 +1,5 @@
 import 'package:wallbay/model/photo_response.dart';
 
-
 class PhotoModel {
   String photoId;
   String createdAt;
@@ -15,6 +14,7 @@ class PhotoModel {
   String username;
   String name;
   String mediumProfilePhotoUrl;
+  String bio;
 
   PhotoModel(
       {this.photoId,
@@ -27,7 +27,8 @@ class PhotoModel {
       this.userId,
       this.username,
       this.name,
-      this.mediumProfilePhotoUrl});
+      this.mediumProfilePhotoUrl,
+      this.bio});
 
   PhotoModel.fromPhotoResponse(PhotoResponse response)
       : photoId = response.id,
@@ -40,5 +41,6 @@ class PhotoModel {
         userId = response.user.id,
         username = response.user.username,
         name = response.user.name,
-        mediumProfilePhotoUrl = response.user.profile_image.medium;
+        mediumProfilePhotoUrl = response.user.profile_image.medium,
+        bio = response.user.bio;
 }

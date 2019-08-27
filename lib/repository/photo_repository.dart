@@ -58,6 +58,40 @@ class PhotoRepository extends Repository {
   }
 
 
+  Future<List<PhotoModel>> fetchUsersPhotos(String userName,int pageNumber) async {
+    String photosUrl = "";
+
+    var accessToken =
+        _sharedPreferences.getString(Constants.OAUTH_ACCESS_TOKEN) ?? "";
+    Map<String, String> map = {"Authorization": "Bearer $accessToken"};
+
+    Dio dio = new Dio();
+    PhotoResponseList list;
+
+    if (_sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false) {
+      // https://api.unsplash.com/photos with Authorization: Bearer ACCESS_TOKEN
+      photosUrl = Constants.BASE_URL + "users/$userName/photos/?page=$pageNumber";
+      Options options = new Options();
+      options.headers = map;
+
+      var response = await dio.get(photosUrl, options: options);
+      list = PhotoResponseList.fromJson(response.data);
+    } else {
+      photosUrl = Constants.BASE_URL +
+          "users/photos/$userName" +
+          "?client_id=${Constants.clientId}&page=$pageNumber";
+      var response = await dio.get(photosUrl);
+      list = PhotoResponseList.fromJson(response.data);
+    }
+
+    List<PhotoModel> models = list.responseList
+        .map((photoResponse) => PhotoModel.fromPhotoResponse(photoResponse))
+        .toList();
+
+    return models;
+  }
+
+
   Future<List<PhotoModel>> searchPhotos(int pageNumber,String query) async {
     String photosUrl = "";
 

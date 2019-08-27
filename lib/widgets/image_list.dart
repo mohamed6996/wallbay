@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
@@ -13,6 +14,7 @@ class ImageList extends StatefulWidget {
   final isFavoriteTab;
   final bool isCollectionPhotos;
   final bool isSearch;
+  final bool isPhotoUserProfile;
   final String query;
   final int collectionId;
   final String userName;
@@ -24,6 +26,7 @@ class ImageList extends StatefulWidget {
       this.isFavoriteTab,
       this.isCollectionPhotos = false,
       this.isSearch = false,
+      this.isPhotoUserProfile = false,
       this.query = '',
       this.collectionId = 0,
       this.userName})
@@ -33,12 +36,7 @@ class ImageList extends StatefulWidget {
   _ImageListState createState() => _ImageListState();
 }
 
-class _ImageListState extends State<ImageList> with AutomaticKeepAliveClientMixin{
-
-  @override
-  bool get wantKeepAlive => true;
-
-
+class _ImageListState extends State<ImageList> {
   List<PhotoModel> models;
   PhotoRepository _photoRepo;
 
@@ -105,6 +103,35 @@ class _ImageListState extends State<ImageList> with AutomaticKeepAliveClientMixi
 
   Widget _buildGridView(
       List<PhotoModel> models, ScrollController scrollController) {
+    return StaggeredGridView.countBuilder(
+      key: PageStorageKey("gridKey"),
+      controller: scrollController,
+      crossAxisCount: 4,
+      itemCount: models.length + 1,
+      itemBuilder: (BuildContext context, int index) {
+        if (index == models.length) {
+          return SpinKitThreeBounce(
+            color: Colors.purple,
+            size: 30.0,
+          );
+        } else {
+          return GestureDetector(
+            onTap: () {
+              onImagePressed(models[index]);
+            },
+            child: GridItemView(
+              models[index],
+              () => onFavoritePressed(index),
+            ),
+          );
+        }
+      },
+      staggeredTileBuilder: (int index) => StaggeredTile.count(
+          index == models.length ? 4 : 2, index == models.length ? 1 : 3.5),
+      mainAxisSpacing: 4.0,
+      crossAxisSpacing: 4.0,
+    );
+
     return Container(
         child: GridView.builder(
             key: PageStorageKey("gridKey"),
@@ -168,7 +195,10 @@ class _ImageListState extends State<ImageList> with AutomaticKeepAliveClientMixi
             currentPage, widget.collectionId);
       } else if (widget.isSearch) {
         newModels = await _photoRepo.searchPhotos(currentPage, widget.query);
-      } else {
+      }
+      else if (widget.isPhotoUserProfile) {
+        newModels = await _photoRepo.fetchUsersPhotos(widget.userName, currentPage);
+      }else {
         newModels = await _photoRepo.fetchPhotos(currentPage);
       }
       // check if return data is empty
