@@ -1,17 +1,25 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unicorndial/unicorndial.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/screens/photo_user_profile.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:image_downloader/image_downloader.dart';
+import 'package:wallpaper/wallpaper.dart';
+import 'package:flutter/services.dart';
 
 class PhotoDetailsScreen extends StatefulWidget {
   final PhotoModel model;
   final PhotoRepository photoRepository;
   final SharedPreferences sharedPreferences;
+  final String heroTag;
+  final platform = const MethodChannel('wallbay/imageDownloader');
 
-  PhotoDetailsScreen(this.model, this.photoRepository, this.sharedPreferences);
+  PhotoDetailsScreen(
+      this.model, this.photoRepository, this.sharedPreferences, this.heroTag);
 
   @override
   _PhotoDetailsScreenState createState() => _PhotoDetailsScreenState();
@@ -37,9 +45,6 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
           child: Icon(Icons.info_outline, color: Colors.white),
           onPressed: () async {
             _showModalSheet();
-//            Navigator.of(context).push(MaterialPageRoute(
-//                builder: (context) =>
-//                    PhotoUserProfile(widget.model, widget.photoRepository,widget.sharedPreferences)));
           },
         )));
 
@@ -54,9 +59,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
           backgroundColor: Colors.black,
           mini: true,
           child: Icon(Icons.wallpaper, color: Colors.white),
-          onPressed: () {
-//            Navigator.of(context)
-//                .push(MaterialPageRoute(builder: (context) => SellPageFE()));
+          onPressed: () async {
+            downloadImage(true);
           },
         )));
 
@@ -71,11 +75,39 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
           backgroundColor: Colors.black,
           mini: true,
           child: Icon(Icons.file_download, color: Colors.white),
-          onPressed: () {
-//            Navigator.of(context)
-//                .push(MaterialPageRoute(builder: (context) => SellPageFE()));
+          onPressed: () async {
+            Map<PermissionGroup, PermissionStatus> permissions =
+                await PermissionHandler()
+                    .requestPermissions([PermissionGroup.storage]);
+
+            downloadImage(false);
           },
         )));
+  }
+
+  downloadImage(bool isWallpaper) async {
+    try {
+      var url = widget.model.downloadPhotoUrl;
+
+      var imageId = await ImageDownloader.downloadImage(url,
+          destination: AndroidDestinationType.directoryPictures
+            ..subDirectory('Wallbay/${widget.model.photoId}.jpg'));
+
+      if (imageId == null) {
+        return;
+      }
+
+      var path = await ImageDownloader.findPath(imageId);
+      //  var fileName = await ImageDownloader.findName(imageId);
+      //  var size = await ImageDownloader.findByteSize(imageId);
+      //  var mimeType = await ImageDownloader.findMimeType(imageId);
+
+      if (isWallpaper) {
+        await widget.platform.invokeMethod('setWallpaper', path);
+      }
+    } catch (error) {
+      print(error);
+    }
   }
 
   @override
@@ -200,15 +232,15 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                 ),
                 Padding(padding: EdgeInsets.all(8)),
                 Text(
-                  '${widget.model.bio == null ? "" :widget.model.bio }',
+                  '${widget.model.bio == null ? "" : widget.model.bio}',
                   textAlign: TextAlign.center,
                 ),
                 FlatButton(
                     onPressed: () {
                       Navigator.of(context).pop();
                       //  _showBottomSheet();
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => w));
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (context) => w));
                     },
                     child: Text('More Photos'))
               ],
@@ -258,344 +290,95 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
             });
           }
         });
-
-//    setState(() {
-//      isFabVisible = false;
-//    });
-//    _scaffoldKey.currentState
-//        .showBottomSheet<void>((BuildContext context) {
-//          final ThemeData themeData = Theme.of(context);
-//          return PhotoUserProfile(
-//              widget.model, widget.photoRepository, widget.sharedPreferences);
-//        }, shape: Border.all(color: Colors.red))
-//        .closed
-//        .whenComplete(() {
-//          if (mounted) {
-//            setState(() {
-//              isFabVisible = true;
-//            });
-//          }
-//        });
   }
-
-//  void _showBottomSheetCallback() {
-//    setState(() {
-//      isSheetVisible = true;
-//      isFabVisible = false;
-//    });
-////    Navigator.of(context).push(MaterialPageRoute(
-////        builder: (context) => PhotoUserProfile(
-////            widget.model, widget.photoRepository, widget.sharedPreferences)));
-//
-//
-//
-//    _scaffoldKey.currentState.showBottomSheet((BuildContext context) {
-//      return Container(
-//        decoration: BoxDecoration(
-//            border: Border(top: BorderSide(color: Colors.black)),
-//            color: Colors.grey),
-//        child: Padding(
-//          padding: const EdgeInsets.all(32.0),
-//          child: Text(
-//            'This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
-//            textAlign: TextAlign.center,
-//            style: TextStyle(
-//              fontSize: 24.0,
-//            ),
-//          ),
-//        ),
-//      );
-//    });
-//  }
 }
 
-//class PhotoDetailsScreen extends StatefulWidget {
-//  final PhotoModel model;
-//  final PhotoRepository photoRepository;
-//  final SharedPreferences sharedPreferences;
-//
-//  PhotoDetailsScreen(this.model, this.photoRepository, this.sharedPreferences);
-//
-//  @override
-//  PhotoDetailsScreenState createState() {
-//    return new PhotoDetailsScreenState();
-//  }
-//}
-//
-//class PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
-//  String shareLink = "";
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    return Scaffold(
-//      body: CustomScrollView(
-//        slivers: <Widget>[
-//          SliverAppBar(
-//            actions: <Widget>[
-//              IconButton(
-//                icon: Icon(Icons.share),
-//                onPressed: () => Share.share(shareLink),
-//                tooltip: "Share",
-//              ),
-//              IconButton(
-//                icon: Icon(Icons.file_download),
-//                onPressed: () => onDownloadPressed(),
-//                tooltip: "Download",
-//              )
-//            ],
-//            floating: false,
-//            // if true, icons will disappear on collapsing
-//            pinned: true,
-//            expandedHeight: 250.0,
-//            flexibleSpace: FlexibleSpaceBar(
-//                collapseMode: CollapseMode.parallax,
-//                background: CachedNetworkImage(
-//                  fit: BoxFit.cover,
-//                  imageUrl: widget.model.regularPhotoUrl,
-//                )),
-//          ),
-//          SliverList(
-//              delegate: SliverChildListDelegate([
-//            userInfo(),
-//            Divider(height: 12.0),
-//            imageState(),
-//            Divider(height: 12.0),
-//            Padding(
-//              padding: const EdgeInsets.fromLTRB(4.0, 18.0, 0.0, 4.0),
-//              child: Text("More photsos by  ${widget.model.name}"),
-//            ),
-//            Container(
-//              child: userPhotosList(),
-//              height: 365.0,
-//            ),
-//            FlatButton(
-//              onPressed: () {},
-//              child: Text("SEE MORE"),
-//              padding: EdgeInsets.all(16.0),
-//            ),
-//            //  FlatButton(onPressed: () {}, child: Text("SEE MORE"))
-//          ])),
-//        ],
-//      ),
-//    );
-//  }
-//
-//  Widget userPhotosList() {
-//    return FutureBuilder(
-//      future: _fetchUserPhotos(),
-//      builder: (BuildContext context, snapshot) {
-//        switch (snapshot.connectionState) {
-//          case ConnectionState.waiting:
-//            return SpinKitCircle(
-//              color: Colors.purple,
-//            );
-//            break;
-//          default:
-//            if (snapshot.hasError) {
-//              return Center(child: Text("Error: ${snapshot.error}"));
-//            }
-//            if (snapshot.hasData) {
-//              return UserPhotoList(
-//                  models: snapshot.data,
-//                  sharedPreferences: widget.sharedPreferences);
-//            }
-//        }
-//      },
-//    );
-//  }
-//
-//  Widget userInfo() {
-//    return Row(
-//        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//        children: <Widget>[
-//          Padding(
-//              padding: EdgeInsets.all(5.0),
-//              child: Row(
-//                children: <Widget>[
-//                  _circleImage(widget.model.mediumProfilePhotoUrl),
-//                  Padding(padding: EdgeInsets.only(left: 10.0)),
-//                  Text(
-//                    widget.model.name,
-//                    style: TextStyle(fontSize: 12.0),
-//                  ),
-//                ],
-//              )),
-//          Padding(
-//            padding: const EdgeInsets.all(5.0),
-//            child: Row(
-//              children: <Widget>[
-//                IconButton(
-//                  icon: Icon(widget.model.liked_by_user
-//                      ? Icons.favorite
-//                      : Icons.favorite_border),
-//                  onPressed: () {
-//                    onFavoritePressed();
-//                  },
-//                ),
-////                IconButton(
-////                  icon: Icon(
-////                    Icons.file_download,
-////                    color: Colors.grey,
-////                  ),
-////                  onPressed: () {
-////                    onDownloadPressed();
-////                  },
-////                ),
-//              ],
-//            ),
-//          ),
-//        ]);
-//  }
-//
-//  Widget imageState() {
-//    return FutureBuilder(
-//      future: _fetchImageState(),
-//      builder: (BuildContext context, snapshot) {
-//        switch (snapshot.connectionState) {
-//          case ConnectionState.waiting:
-//            return Center(
-//                child: SpinKitCircle(
-//              size: 60.0,
-//              color: Colors.purple,
-//            ));
-//            break;
-//          default:
-//            if (snapshot.hasError) {
-//              return Center(child: Text("Error: ${snapshot.error}"));
-//            }
-//            if (snapshot.hasData) {
-//              return state(snapshot.data);
-//            }
-//        }
-//      },
-//    );
-//  }
-//
-//  Widget state(PhotoDetailsModel model) {
-//    shareLink = model.shareLink;
-//    return Row(
-//      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//      children: <Widget>[
-//        Column(
-//          crossAxisAlignment: CrossAxisAlignment.start,
-//          children: <Widget>[
-//            Row(
-//              children: <Widget>[
-//                Padding(
-//                  padding: const EdgeInsets.fromLTRB(4.0, 4.0, 8.0, 4.0),
-//                  child: Icon(Icons.place),
-//                ),
-//                Text("${model.country}"),
-//              ],
-//            ),
-//            Row(
-//              children: <Widget>[
-//                Padding(
-//                  padding: const EdgeInsets.fromLTRB(4.0, 4.0, 8.0, 4.0),
-//                  child: Icon(Icons.date_range),
-//                ),
-//                Text(model.created_at.split("T")[0])
-//              ],
-//            ),
-//          ],
-//        ),
-//        Column(
-//          crossAxisAlignment: CrossAxisAlignment.start,
-//          children: <Widget>[
-//            Row(
-//              children: <Widget>[
-//                Icon(Icons.favorite),
-//                Padding(
-//                  padding: const EdgeInsets.all(8.0),
-//                  child: Text("${model.likes} likes"),
-//                )
-//              ],
-//            ),
-//            Row(
-//              children: <Widget>[
-//                Icon(Icons.file_download),
-//                Padding(
-//                  padding: const EdgeInsets.all(8.0),
-//                  child: Text("${model.downloads} downloads"),
-//                )
-//              ],
-//            ),
-//          ],
-//        )
-//      ],
-//    );
-//  }
-//
-//  Widget _circleImage(String url) {
-//    return Container(
-//        width: 35.0,
-//        height: 35.0,
-//        decoration: new BoxDecoration(
-//            shape: BoxShape.circle,
-//            image: new DecorationImage(
-//                fit: BoxFit.cover, image: new NetworkImage(url))));
-//  }
-//
-//  onFavoritePressed() {
-//    String photoId = widget.model.photoId;
-//    if (!widget.model.liked_by_user) {
-//      widget.photoRepository.likePhoto(photoId).then((_) {
-//        setState(() {
-//          widget.model.liked_by_user = true;
-//        });
-//      });
-//    } else {
-//      widget.photoRepository.unlikePhoto(photoId).then((_) {
-//        setState(() {
-//          widget.model.liked_by_user = false;
-//        });
-//      });
-//    }
-//  }
-//
-//  onDownloadPressed() {}
-//
-//  _fetchUserPhotos() async {
-//    return PhotoRepository(widget.sharedPreferences)
-//        .fetchUserPhotos(1, widget.model.username);
-//  }
-//
-//  _fetchImageState() async {
-//    return PhotoRepository(widget.sharedPreferences)
-//        .fetchPhotoDetails(widget.model.photoId);
-//  }
-//
-////todo next version
-//  Widget collectionList() {
-//    return FutureBuilder(
-//      future: _fetchCollection(),
-//      builder: (BuildContext context, snapshot) {
-//        switch (snapshot.connectionState) {
-//          case ConnectionState.waiting:
-//            return Center(
-//                child: SpinKitCircle(
-//              color: Colors.purple,
-//            ));
-//            break;
-//          default:
-//            if (snapshot.hasError) {
-//              return Center(child: Text("Error: ${snapshot.error}"));
-//            }
-//            if (snapshot.hasData) {
-//              return UserCollectionList(
-//                models: snapshot.data,
-//                sharedPreferences: widget.sharedPreferences,
-//              );
-//            }
-//        }
-//      },
-//    );
-//  }
-//
-//  _fetchCollection() async {
-//    return PhotoRepository(widget.sharedPreferences)
-//        .fetchUserCollections(1, widget.model.username);
-//  }
-//}
-//
-//
+
+
+//todo to be deleted
+class SetWallPaper extends StatefulWidget {
+  final String url;
+
+  SetWallPaper(this.url);
+
+  @override
+  _SetWallPaperState createState() => _SetWallPaperState();
+}
+
+class _SetWallPaperState extends State<SetWallPaper> {
+  bool isDownloading = false;
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+        title: Text('Set Wallpaper'),
+        content: isDownloading == false
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                    _listItem('Home Screen', Icons.home, () {
+                      setState(() {
+                        isDownloading = true;
+                      });
+
+                      Wallpaper.ImageDownloadProgress(widget.url)
+                          .listen((data) {}, onDone: () {
+                        //  await Wallpaper.homeScreen();
+                        print('calllllled');
+                        //  Navigator.of(context).pop();
+                        //  isDownloading = false;
+                      });
+                    }),
+                    _listItem('Lock Screen', Icons.lock, () {
+                      Wallpaper.ImageDownloadProgress(widget.url).listen(
+                          (data) {
+                        setState(() {
+                          isDownloading = true;
+                        });
+                      }, onDone: () async {
+                        await Wallpaper.lockScreen();
+                        Navigator.of(context).pop();
+                        isDownloading = false;
+                      });
+                    }),
+                    _listItem('Both', Icons.phone_android, () {
+                      Wallpaper.ImageDownloadProgress(widget.url).listen(
+                          (data) {
+                        setState(() {
+                          isDownloading = true;
+                        });
+                      }, onDone: () async {
+                        await Wallpaper.homeScreen();
+                        await Wallpaper.lockScreen();
+                        Navigator.of(context).pop();
+                        isDownloading = false;
+                      });
+                    })
+                  ])
+            : Container(
+                height: 100,
+                child: Center(child: CircularProgressIndicator())));
+  }
+
+  _listItem(String desc, IconData icon, VoidCallback callback) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          callback();
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: <Widget>[
+              Icon(icon, color: Colors.orange),
+              Padding(padding: EdgeInsets.symmetric(horizontal: 8)),
+              Text(desc),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -92,10 +92,11 @@ class _ImageListState extends State<ImageList> {
                   onTap: () {
                     onImagePressed(models[index]);
                   },
-                  child: ImageCard(
-                    models[index],
-                    () => onFavoritePressed(index),
-                  ),
+                  child:  ImageCard(
+                      models[index],
+                      () => onFavoritePressed(index),
+                    ),
+
                 );
               }
             }));
@@ -119,46 +120,19 @@ class _ImageListState extends State<ImageList> {
             onTap: () {
               onImagePressed(models[index]);
             },
-            child: GridItemView(
-              models[index],
-              () => onFavoritePressed(index),
-            ),
+            child:  GridItemView(
+                models[index],
+                () => onFavoritePressed(index),
+              ),
           );
         }
       },
       staggeredTileBuilder: (int index) => StaggeredTile.count(
-          index == models.length ? 4 : 2, index == models.length ? 1 : 3.5),
+          index == models.length ? 4 : 2, index == models.length ? .5 : 3.5),
       mainAxisSpacing: 4.0,
       crossAxisSpacing: 4.0,
     );
 
-    return Container(
-        child: GridView.builder(
-            key: PageStorageKey("gridKey"),
-            controller: scrollController,
-            itemCount: models.length + 1,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: .55,
-            ),
-            itemBuilder: (context, index) {
-              if (index == models.length) {
-                return SpinKitThreeBounce(
-                  color: Colors.purple,
-                  size: 30.0,
-                );
-              } else {
-                return GestureDetector(
-                  onTap: () {
-                    onImagePressed(models[index]);
-                  },
-                  child: GridItemView(
-                    models[index],
-                    () => onFavoritePressed(index),
-                  ),
-                );
-              }
-            }));
   }
 
   onFavoritePressed(int index) async {
@@ -226,6 +200,8 @@ class _ImageListState extends State<ImageList> {
         context,
         MaterialPageRoute(
             builder: (context) => PhotoDetailsScreen(
-                model, _photoRepo, widget.sharedPreferences)));
+                model, _photoRepo, widget.sharedPreferences,model.photoId))
+
+    );
   }
 }

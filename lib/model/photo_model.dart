@@ -9,6 +9,10 @@ class PhotoModel {
   String regularPhotoUrl;
   String color;
 
+  //photo
+  String fullPhotoUrl;
+  String downloadPhotoUrl;
+
   //user
   String userId;
   String username;
@@ -23,6 +27,8 @@ class PhotoModel {
       this.height,
       this.liked_by_user,
       this.regularPhotoUrl,
+      this.fullPhotoUrl,
+      this.downloadPhotoUrl,
       this.color,
       this.userId,
       this.username,
@@ -37,6 +43,8 @@ class PhotoModel {
         height = response.height,
         liked_by_user = response.liked_by_user,
         regularPhotoUrl = response.urls.regular,
+        fullPhotoUrl = response.urls.full,
+        downloadPhotoUrl = response.links.download,
         color = response.color,
         userId = response.user.id,
         username = response.user.username,

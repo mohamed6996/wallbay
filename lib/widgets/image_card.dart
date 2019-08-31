@@ -13,30 +13,61 @@ class ImageCard extends StatelessWidget {
     return new Card(
       child: Column(
         children: <Widget>[
-          CachedNetworkImage(
-            fit: BoxFit.fill,
-            imageUrl: photoModel.regularPhotoUrl,
-            errorWidget: (context, String s, o) {
-              return Icon(Icons.error);
-            },
-            placeholder: (context, String err) {
-              return SizedBox(
-                width: double.infinity,
-                height: 250.0,
-                child: DecoratedBox(
-                    child: Center(
-                        child: CircularProgressIndicator(
-                      valueColor:
-                          new AlwaysStoppedAnimation<Color>(Colors.white),
-                      strokeWidth: 0.5,
-                    )),
-                    decoration: BoxDecoration(
-                        color: Color(int.parse(
-                            "0xFF${photoModel.color.substring(1)}")))),
-                //https://stackoverflow.com/questions/50081213/how-do-i-use-hexadecimal-color-strings-in-flutter
-                // use subString to remove the #
-              );
-            },
+//          CachedNetworkImage(
+//            fit: BoxFit.fill,
+//            imageUrl: photoModel.regularPhotoUrl,
+//            errorWidget: (context, String s, o) {
+//              return Icon(Icons.error);
+//            },
+//            placeholder: (context, String err) {
+//              print(err);
+//              return SizedBox(
+//                width: double.infinity,
+//               height: 250.0,
+//                child: DecoratedBox(
+//                    child: Center(
+//                        child: CircularProgressIndicator(
+//                      valueColor:
+//                          new AlwaysStoppedAnimation<Color>(Colors.white),
+//                      strokeWidth: 0.5,
+//                    )),
+//                    decoration: BoxDecoration(
+//                        color: Color(int.parse(
+//                            "0xFF${photoModel.color.substring(1)}")))),
+//                //https://stackoverflow.com/questions/50081213/how-do-i-use-hexadecimal-color-strings-in-flutter
+//                // use subString to remove the #
+//              );
+//            },
+//          ),
+
+
+          AspectRatio(
+            aspectRatio:photoModel.width / photoModel.height,
+            child: CachedNetworkImage(
+              fit: BoxFit.cover,
+              imageUrl: photoModel.regularPhotoUrl,
+              errorWidget: (context, String s, o) {
+                return Icon(Icons.error);
+              },
+              placeholder: (context, String err) {
+                print(err);
+                return AspectRatio(
+                  aspectRatio:photoModel.width / photoModel.height,
+                  child: DecoratedBox(
+                      child: Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                            new AlwaysStoppedAnimation<Color>(Colors.white),
+                            strokeWidth: 0.5,
+                          )),
+                      decoration: BoxDecoration(
+                          color: Color(int.parse(
+                              "0xFF${photoModel.color.substring(1)}")))),
+                  //https://stackoverflow.com/questions/50081213/how-do-i-use-hexadecimal-color-strings-in-flutter
+                  // use subString to remove the #
+                );
+              },
+            ),
           ),
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -20,8 +20,10 @@ import 'package:dio/dio.dart';
 
 class PhotoRepository extends Repository {
   final SharedPreferences _sharedPreferences;
-
-  PhotoRepository(this._sharedPreferences);
+  Dio dio;
+  PhotoRepository(this._sharedPreferences){
+    dio = new Dio();
+  }
 
   @override
   Future<List<PhotoModel>> fetchPhotos(int pageNumber) async {
@@ -31,7 +33,6 @@ class PhotoRepository extends Repository {
         _sharedPreferences.getString(Constants.OAUTH_ACCESS_TOKEN) ?? "";
     Map<String, String> map = {"Authorization": "Bearer $accessToken"};
 
-    Dio dio = new Dio();
     PhotoResponseList list;
 
     if (_sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false) {
@@ -65,10 +66,10 @@ class PhotoRepository extends Repository {
         _sharedPreferences.getString(Constants.OAUTH_ACCESS_TOKEN) ?? "";
     Map<String, String> map = {"Authorization": "Bearer $accessToken"};
 
-    Dio dio = new Dio();
     PhotoResponseList list;
 
     if (_sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false) {
+      print('if called');
       // https://api.unsplash.com/photos with Authorization: Bearer ACCESS_TOKEN
       photosUrl = Constants.BASE_URL + "users/$userName/photos/?page=$pageNumber";
       Options options = new Options();
@@ -77,8 +78,9 @@ class PhotoRepository extends Repository {
       var response = await dio.get(photosUrl, options: options);
       list = PhotoResponseList.fromJson(response.data);
     } else {
+      print('else called');
       photosUrl = Constants.BASE_URL +
-          "users/photos/$userName" +
+          "users/$userName/photos/" +
           "?client_id=${Constants.clientId}&page=$pageNumber";
       var response = await dio.get(photosUrl);
       list = PhotoResponseList.fromJson(response.data);
@@ -99,7 +101,6 @@ class PhotoRepository extends Repository {
         _sharedPreferences.getString(Constants.OAUTH_ACCESS_TOKEN) ?? "";
     Map<String, String> map = {"Authorization": "Bearer $accessToken"};
 
-    Dio dio = new Dio();
     PhotoSearchResponse list;
 
     if (_sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false) {
@@ -139,7 +140,6 @@ class PhotoRepository extends Repository {
         _sharedPreferences.getString(Constants.OAUTH_ACCESS_TOKEN) ?? "";
     Map<String, String> map = {"Authorization": "Bearer $accessToken"};
 
-    Dio dio = new Dio();
     PhotoResponseList list;
 
     photosUrl = Constants.BASE_URL + "users/$userName/likes/?page=$pageNumber";
@@ -167,7 +167,6 @@ class PhotoRepository extends Repository {
 
     Map<String, String> map = {"Authorization": "Bearer $accessToken"};
 
-    Dio dio = new Dio();
     Options options = new Options();
     options.headers = map;
 
@@ -191,7 +190,6 @@ class PhotoRepository extends Repository {
 
     Map<String, String> map = {"Authorization": "Bearer $accessToken"};
 
-    Dio dio = new Dio();
     Options options = new Options();
     options.headers = map;
 
@@ -208,7 +206,6 @@ class PhotoRepository extends Repository {
         _sharedPreferences.getString(Constants.OAUTH_ACCESS_TOKEN) ?? "";
     Map<String, String> map = {"Authorization": "Bearer $accessToken"};
 
-    Dio dio = new Dio();
     Options options = new Options();
     options.headers = map;
 
@@ -219,7 +216,6 @@ class PhotoRepository extends Repository {
 
   @override
   Future<List<CollectionModel>> fetchCollections(int pageNumber) async {
-    Dio dio = new Dio();
 
     String collectionsUrl = Constants.BASE_URL +
         "collections/?client_id=${Constants.clientId}&page=$pageNumber";
@@ -238,7 +234,6 @@ class PhotoRepository extends Repository {
 
 
   Future<List<PhotoModel>> fetchCollectionPhotos(int pageNumber,int collectionId)async{
-    Dio dio = new Dio();
     PhotoResponseList list;
 
     String collectionsUrl = Constants.BASE_URL +
@@ -257,7 +252,6 @@ class PhotoRepository extends Repository {
   @override
   Future<List<CollectionModel>> fetchUserCollections(
       int pageNumber, String userName) async {
-    Dio dio = new Dio();
 
     String collectionsUrl = Constants.BASE_URL +
         "users/$userName/collections/?client_id=${Constants.clientId}&page=$pageNumber";
@@ -277,7 +271,6 @@ class PhotoRepository extends Repository {
   @override
   Future<List<PhotoModel>> fetchUserPhotos(
       int pageNumber, String userName) async {
-    Dio dio = new Dio();
 
     String userPhotosUrl = Constants.BASE_URL +
         "users/$userName/photos/?client_id=${Constants.clientId}&page=$pageNumber";
@@ -295,7 +288,6 @@ class PhotoRepository extends Repository {
 
   @override
   Future<PhotoDetailsModel> fetchPhotoDetails(String id) async {
-    Dio dio = new Dio();
 
     String userPhotosUrl =
         Constants.BASE_URL + "photos/$id/?client_id=${Constants.clientId}";
