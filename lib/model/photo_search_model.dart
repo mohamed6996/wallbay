@@ -1,7 +1,8 @@
 import 'package:wallbay/model/photo_response.dart';
-import 'package:wallbay/model/photo_search_response.dart';
 
 
+
+//todo to be removed
 class PhotoSearchModel {
   String photoId;
   String createdAt;

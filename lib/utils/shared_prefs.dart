@@ -24,4 +24,17 @@ class SharedPrefs {
  static int loadSavedLayout() {
     return _preferences.getInt('layout');
   }
+
+
+
+
+
+  //Choose Collection methods
+  static saveCollection(int collection) {
+    _preferences.setInt('collection', collection);
+  }
+
+  static int loadSavedCollection() {
+    return _preferences.getInt('collection');
+  }
 }

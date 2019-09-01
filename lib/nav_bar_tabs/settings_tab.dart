@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:wallbay/utils/shared_prefs.dart';
 
 class SettingsTab extends StatefulWidget {
-
   @override
   _SettingsTabState createState() => _SettingsTabState();
 }
@@ -39,12 +38,32 @@ class _SettingsTabState extends State<SettingsTab> {
               Divider(),
               Padding(
                 padding: EdgeInsets.all(8.0),
+                child: Text('Collection'),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListTile(
+                  title: Text('Default Collection'),
+                  subtitle: Text('Choose which collection to show.'),
+                  onTap: () async {
+                    await showDialog(
+                        context: context,
+                        builder: (context) {
+                          return CollectionType();
+                        });
+                  },
+                ),
+              ),
+              Divider(),
+              Padding(
+                padding: EdgeInsets.all(8.0),
                 child: Text('About'),
               ),
               Padding(
                 padding: EdgeInsets.only(left: 8.0),
                 child: ListView(
                   shrinkWrap: true,
+                  primary: false,
                   children: <Widget>[
                     ListTile(
                       title: Text('Recommend'),
@@ -81,15 +100,17 @@ class PickTypeDialog extends StatefulWidget {
 
 class _PickTypeDialogState extends State<PickTypeDialog> {
   int _radioValue = 0;
-@override
+
+  @override
   void initState() {
     super.initState();
-    var value =  SharedPrefs.loadSavedLayout();
-    if(value != null) {
+    var value = SharedPrefs.loadSavedLayout();
+    if (value != null) {
       _radioValue = value;
     }
-    print('saved prefs: $_radioValue' );
+    print('saved prefs: $_radioValue');
   }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -107,6 +128,7 @@ class _PickTypeDialogState extends State<PickTypeDialog> {
                 setState(() {
                   _radioValue = value;
                   SharedPrefs.saveLayout(value);
+                  Navigator.of(context).pop();
                 });
               }),
           RadioListTile(
@@ -117,9 +139,9 @@ class _PickTypeDialogState extends State<PickTypeDialog> {
                 setState(() {
                   _radioValue = value;
                   SharedPrefs.saveLayout(value);
+                  Navigator.of(context).pop();
                 });
               }),
-
           RadioListTile(
               title: Text('Staggered'),
               value: 2,
@@ -128,19 +150,65 @@ class _PickTypeDialogState extends State<PickTypeDialog> {
                 setState(() {
                   _radioValue = value;
                   SharedPrefs.saveLayout(value);
+                  Navigator.of(context).pop();
                 });
               }),
-
         ],
       ),
-      actions: [
-        FlatButton(
-          child: Text('OK'),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        )
-      ],
+    );
+  }
+}
+
+class CollectionType extends StatefulWidget {
+  @override
+  _CollectionTypeState createState() => _CollectionTypeState();
+}
+
+class _CollectionTypeState extends State<CollectionType> {
+  int _radioValue = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    var value = SharedPrefs.loadSavedCollection();
+    if (value != null) {
+      _radioValue = value;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Show me'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          RadioListTile(
+              title: Text('All'),
+              value: 0,
+              groupValue: _radioValue,
+              onChanged: (value) {
+                setState(() {
+                  _radioValue = value;
+                  SharedPrefs.saveCollection(value);
+                  Navigator.of(context).pop();
+                });
+              }),
+          RadioListTile(
+              title: Text('Wallpaper'),
+              value: 1,
+              groupValue: _radioValue,
+              onChanged: (value) {
+                setState(() {
+                  _radioValue = value;
+                  SharedPrefs.saveCollection(value);
+                  Navigator.of(context).pop();
+                });
+              }),
+        ],
+      ),
     );
   }
 }

@@ -9,12 +9,13 @@ class CollectionList extends StatefulWidget {
   final List<CollectionModel> models;
   final SharedPreferences sharedPreferences;
   final bool userCollection;
+  final bool isWallpaper;
 
   CollectionList(
       {Key key,
       this.models,
       this.sharedPreferences,
-      this.userCollection = false})
+      this.userCollection = false, this.isWallpaper = false})
       : super(key: key);
 
   @override
@@ -81,8 +82,16 @@ class _CollectionListState extends State<CollectionList> {
         isPerformingRequest = true;
         currentPage++;
       });
-      List<CollectionModel> newModels =
-          await _photoRepo.fetchCollections(currentPage);
+
+      List<CollectionModel> newModels ;
+      if(!widget.isWallpaper){
+       newModels =
+        await _photoRepo.fetchCollections(currentPage);
+      }else{
+        newModels =
+        await _photoRepo.searchCollections(currentPage);
+      }
+
       // check if return data is empty
       if (newModels.isEmpty) {
         double edge = 30.0;

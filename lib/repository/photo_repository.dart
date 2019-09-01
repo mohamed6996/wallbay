@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallbay/constants.dart';
+import 'package:wallbay/model/collectionSearchResponse.dart';
 import 'package:wallbay/model/collection_model.dart';
 import 'package:wallbay/model/collection_response.dart';
 import 'package:wallbay/model/me_model.dart';
@@ -21,7 +22,8 @@ import 'package:dio/dio.dart';
 class PhotoRepository extends Repository {
   final SharedPreferences _sharedPreferences;
   Dio dio;
-  PhotoRepository(this._sharedPreferences){
+
+  PhotoRepository(this._sharedPreferences) {
     dio = new Dio();
   }
 
@@ -58,8 +60,8 @@ class PhotoRepository extends Repository {
     return models;
   }
 
-
-  Future<List<PhotoModel>> fetchUsersPhotos(String userName,int pageNumber) async {
+  Future<List<PhotoModel>> fetchUsersPhotos(
+      String userName, int pageNumber) async {
     String photosUrl = "";
 
     var accessToken =
@@ -71,7 +73,8 @@ class PhotoRepository extends Repository {
     if (_sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false) {
       print('if called');
       // https://api.unsplash.com/photos with Authorization: Bearer ACCESS_TOKEN
-      photosUrl = Constants.BASE_URL + "users/$userName/photos/?page=$pageNumber";
+      photosUrl =
+          Constants.BASE_URL + "users/$userName/photos/?page=$pageNumber";
       Options options = new Options();
       options.headers = map;
 
@@ -93,8 +96,7 @@ class PhotoRepository extends Repository {
     return models;
   }
 
-
-  Future<List<PhotoModel>> searchPhotos(int pageNumber,String query) async {
+  Future<List<PhotoModel>> searchPhotos(int pageNumber, String query) async {
     String photosUrl = "";
 
     var accessToken =
@@ -104,7 +106,8 @@ class PhotoRepository extends Repository {
     PhotoSearchResponse list;
 
     if (_sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false) {
-      photosUrl = Constants.BASE_URL + "search/photos/?page=$pageNumber&query=$query";
+      photosUrl =
+          Constants.BASE_URL + "search/photos/?page=$pageNumber&query=$query";
       Options options = new Options();
       options.headers = map;
 
@@ -118,18 +121,12 @@ class PhotoRepository extends Repository {
       list = PhotoSearchResponse.fromJson(response.data);
     }
 
-
-
     List<PhotoModel> models = list.results
         .map((photoResponse) => PhotoModel.fromPhotoResponse(photoResponse))
         .toList();
 
-    print(models.length);
-
-
     return models;
   }
-
 
   @override
   Future<List<PhotoModel>> fetchFavoritePhotos(
@@ -216,7 +213,6 @@ class PhotoRepository extends Repository {
 
   @override
   Future<List<CollectionModel>> fetchCollections(int pageNumber) async {
-
     String collectionsUrl = Constants.BASE_URL +
         "collections/?client_id=${Constants.clientId}&page=$pageNumber";
 
@@ -232,8 +228,27 @@ class PhotoRepository extends Repository {
     return models;
   }
 
+  Future<List<CollectionModel>> searchCollections(int pageNumber,
+      {String query = "wallpaper"}) async {
+    String collectionsUrl = Constants.BASE_URL +
+        "search/collections/?client_id=${Constants.clientId}&page=$pageNumber&query=$query";
 
-  Future<List<PhotoModel>> fetchCollectionPhotos(int pageNumber,int collectionId)async{
+    var response = await dio.get(collectionsUrl);
+
+    CollectionSearchResponse list;
+
+    list = CollectionSearchResponse.fromJson(response.data);
+
+    List<CollectionModel> models = list.results
+        .map((collectionResponse) =>
+            CollectionModel.fromCollectionResponse(collectionResponse))
+        .toList();
+
+    return models;
+  }
+
+  Future<List<PhotoModel>> fetchCollectionPhotos(
+      int pageNumber, int collectionId) async {
     PhotoResponseList list;
 
     String collectionsUrl = Constants.BASE_URL +
@@ -252,7 +267,6 @@ class PhotoRepository extends Repository {
   @override
   Future<List<CollectionModel>> fetchUserCollections(
       int pageNumber, String userName) async {
-
     String collectionsUrl = Constants.BASE_URL +
         "users/$userName/collections/?client_id=${Constants.clientId}&page=$pageNumber";
 
@@ -271,7 +285,6 @@ class PhotoRepository extends Repository {
   @override
   Future<List<PhotoModel>> fetchUserPhotos(
       int pageNumber, String userName) async {
-
     String userPhotosUrl = Constants.BASE_URL +
         "users/$userName/photos/?client_id=${Constants.clientId}&page=$pageNumber";
 
@@ -288,7 +301,6 @@ class PhotoRepository extends Repository {
 
   @override
   Future<PhotoDetailsModel> fetchPhotoDetails(String id) async {
-
     String userPhotosUrl =
         Constants.BASE_URL + "photos/$id/?client_id=${Constants.clientId}";
 
