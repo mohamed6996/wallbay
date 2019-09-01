@@ -14,7 +14,7 @@ class ImageCard extends StatelessWidget {
       child: Column(
         children: <Widget>[
           AspectRatio(
-            aspectRatio:photoModel.width / photoModel.height,
+            aspectRatio: photoModel.width / photoModel.height,
             child: CachedNetworkImage(
               fit: BoxFit.cover,
               imageUrl: photoModel.regularPhotoUrl,
@@ -24,14 +24,14 @@ class ImageCard extends StatelessWidget {
               placeholder: (context, String err) {
                 print(err);
                 return AspectRatio(
-                  aspectRatio:photoModel.width / photoModel.height,
+                  aspectRatio: photoModel.width / photoModel.height,
                   child: DecoratedBox(
                       child: Center(
                           child: CircularProgressIndicator(
-                            valueColor:
+                        valueColor:
                             new AlwaysStoppedAnimation<Color>(Colors.white),
-                            strokeWidth: 0.5,
-                          )),
+                        strokeWidth: 0.5,
+                      )),
                       decoration: BoxDecoration(
                           color: Color(int.parse(
                               "0xFF${photoModel.color.substring(1)}")))),
@@ -85,6 +85,46 @@ class ImageCard extends StatelessWidget {
   }
 }
 
+class StaggeredWidget extends StatelessWidget {
+  final PhotoModel photoModel;
+
+  StaggeredWidget(this.photoModel);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: AspectRatio(
+          aspectRatio: photoModel.width / photoModel.height,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: CachedNetworkImage(
+              fit: BoxFit.cover,
+              imageUrl: photoModel.regularPhotoUrl,
+              errorWidget: (context, String s, o) {
+                return Icon(Icons.error);
+              },
+              placeholder: (context, String err) {
+                print(err);
+                return AspectRatio(
+                  aspectRatio: photoModel.width / photoModel.height,
+                  child: DecoratedBox(
+                      child: Center(
+                          child: CircularProgressIndicator(
+                        valueColor:
+                            new AlwaysStoppedAnimation<Color>(Colors.white),
+                        strokeWidth: 0.5,
+                      )),
+                      decoration: BoxDecoration(
+                          color: Color(int.parse(
+                              "0xFF${photoModel.color.substring(1)}")))),
+                );
+              },
+            ),
+          )),
+    );
+  }
+}
+
 class GridItemView extends StatelessWidget {
   final PhotoModel photoModel;
   final VoidCallback onFavoritePressed;
@@ -125,7 +165,6 @@ class GridItemView extends StatelessWidget {
             ),
           ),
         ),
-
         Positioned(
             bottom: 0,
             right: 0,
@@ -134,7 +173,6 @@ class GridItemView extends StatelessWidget {
                     ? Icon(Icons.favorite, color: Colors.red)
                     : Icon(Icons.favorite_border, color: Colors.white),
                 onPressed: onFavoritePressed))
-
       ],
     );
   }

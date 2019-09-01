@@ -70,10 +70,13 @@ class _ImageListState extends State<ImageList> {
   @override
   Widget build(BuildContext context) {
     int layout = SharedPrefs.loadSavedLayout() ?? 0;
+
     if (layout == 0)
       return _buildListView(models, _scrollController);
-    else
+    else if (layout == 1)
       return _buildGridView(models, _scrollController);
+    else
+      return _buildStaggeredGridView(models, _scrollController);
   }
 
   Widget _buildListView(
@@ -135,6 +138,38 @@ class _ImageListState extends State<ImageList> {
     );
   }
 
+  Widget _buildStaggeredGridView(
+      List<PhotoModel> models, ScrollController scrollController) {
+    print('staggedred called');
+    return StaggeredGridView.countBuilder(
+      key: PageStorageKey("gridKey"),
+      controller: scrollController,
+      crossAxisCount: 4,
+      itemCount: models.length + 1,
+      itemBuilder: (BuildContext context, int index) {
+        if (index == models.length) {
+          return SpinKitThreeBounce(
+            color: Colors.purple,
+            size: 30.0,
+          );
+        } else {
+          return GestureDetector(
+            onTap: () {
+              onImagePressed(models[index]);
+            },
+            child: StaggeredWidget(
+              models[index],
+            ),
+          );
+        }
+      },
+      staggeredTileBuilder: (int index) => StaggeredTile.fit(2),
+      padding: EdgeInsets.all(4),
+      mainAxisSpacing: 4.0,
+      crossAxisSpacing: 4.0,
+    );
+  }
+
   void _fetchMoreData() async {
     if (!isPerformingRequest) {
       setState(() {
@@ -158,7 +193,7 @@ class _ImageListState extends State<ImageList> {
       }
       // check if return data is empty
       if (newModels.isEmpty) {
-        double edge = 30.0;
+        double edge = 40;
         double offSetFromBottom = _scrollController.position.maxScrollExtent -
             _scrollController.position.pixels;
         if (offSetFromBottom < edge) {

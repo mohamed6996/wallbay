@@ -119,6 +119,18 @@ class _PickTypeDialogState extends State<PickTypeDialog> {
                   SharedPrefs.saveLayout(value);
                 });
               }),
+
+          RadioListTile(
+              title: Text('Staggered'),
+              value: 2,
+              groupValue: _radioValue,
+              onChanged: (value) {
+                setState(() {
+                  _radioValue = value;
+                  SharedPrefs.saveLayout(value);
+                });
+              }),
+
         ],
       ),
       actions: [
