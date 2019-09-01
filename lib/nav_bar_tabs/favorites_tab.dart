@@ -8,70 +8,76 @@ import 'package:wallbay/widgets/image_list.dart';
 
 class FavoritesTab extends StatelessWidget {
   final SharedPreferences sharedPreferences;
+  final bool isLogedin;
+  final _meMemoizer = AsyncMemoizer();
   final _memoizer = AsyncMemoizer();
 
-  FavoritesTab(Key key, this.sharedPreferences) : super(key: key);
+  FavoritesTab(Key key, this.sharedPreferences, {this.isLogedin})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Favorits')),
-      body: FutureBuilder(
-          future: _fetchMe(),
-          builder: (context, AsyncSnapshot<MeModel> userNameSnapshot) {
-            switch (userNameSnapshot.connectionState) {
-              case ConnectionState.waiting:
-                return Center(
-                    child: SpinKitHourGlass(
+      body: isLogedin == true
+          ? FutureBuilder(
+              future: _fetchMe(),
+              builder: (context, userNameSnapshot) {
+                switch (userNameSnapshot.connectionState) {
+                  case ConnectionState.waiting:
+                    return Center(
+                        child: SpinKitHourGlass(
                       color: Colors.purple,
                     ));
-                break;
-              default:
-                if (userNameSnapshot.hasError) {
-                  return Center(child: Text("Error: ${userNameSnapshot.error}"));
-                } else {
-                  return FutureBuilder(
-                      future: _fetchData(userNameSnapshot.data.username),
-                      builder: (context, snapshot) {
-                        switch (snapshot.connectionState) {
-                          case ConnectionState.waiting:
-                            return Center(
-                                child: SpinKitHourGlass(
+                    break;
+                  default:
+                    if (userNameSnapshot.hasError) {
+                      return Center(
+                          child: Text("Error: ${userNameSnapshot.error}"));
+                    } else {
+                      return FutureBuilder(
+                          future: _fetchData(userNameSnapshot.data.username),
+                          builder: (context, snapshot) {
+                            switch (snapshot.connectionState) {
+                              case ConnectionState.waiting:
+                                return Center(
+                                    child: SpinKitHourGlass(
                                   color: Colors.purple,
                                 ));
-                            break;
-                          default:
-                            if (snapshot.hasData) {
-                              return ImageList(
-                                models: snapshot.data,
-                                sharedPreferences: sharedPreferences,
-                                isFavoriteTab: true,
-                                userName: userNameSnapshot.data.username,
-                              );
-                            } else {
-                              return Center(
-                                  child: Text("Error: ${snapshot.error}"));
+                                break;
+                              default:
+                                if (snapshot.hasData) {
+                                  return ImageList(
+                                    models: snapshot.data,
+                                    sharedPreferences: sharedPreferences,
+                                    isFavoriteTab: true,
+                                    userName: userNameSnapshot.data.username,
+                                  );
+                                } else {
+                                  return Center(
+                                      child: Text("Error: ${snapshot.error}"));
+                                }
                             }
-                        }
-                      });
+                          });
+                    }
                 }
-            }
-          }),
+              })
+          : Center(
+              child: Text('You must login first'),
+            ),
     );
   }
 
-  Future<MeModel> _fetchMe() async {
-    return await PhotoRepository(sharedPreferences).getMe();
+  _fetchMe() async {
+    return _meMemoizer.runOnce(() async {
+      return await PhotoRepository(sharedPreferences).getMe();
+    });
   }
 
   _fetchData(String userName) async {
-    return PhotoRepository(sharedPreferences).fetchFavoritePhotos(1, userName);
-  }
-}
-
-class LikedPhotos extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
+    return _memoizer.runOnce(() async {
+      return PhotoRepository(sharedPreferences)
+          .fetchFavoritePhotos(1, userName);
+    });
   }
 }

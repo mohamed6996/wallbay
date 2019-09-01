@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:wallbay/constants.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/screens/photo_details_screen.dart';
@@ -92,11 +94,10 @@ class _ImageListState extends State<ImageList> {
                   onTap: () {
                     onImagePressed(models[index]);
                   },
-                  child:  ImageCard(
-                      models[index],
-                      () => onFavoritePressed(index),
-                    ),
-
+                  child: ImageCard(
+                    models[index],
+                    () => onFavoritePressed(index),
+                  ),
                 );
               }
             }));
@@ -120,10 +121,10 @@ class _ImageListState extends State<ImageList> {
             onTap: () {
               onImagePressed(models[index]);
             },
-            child:  GridItemView(
-                models[index],
-                () => onFavoritePressed(index),
-              ),
+            child: GridItemView(
+              models[index],
+              () => onFavoritePressed(index),
+            ),
           );
         }
       },
@@ -132,26 +133,6 @@ class _ImageListState extends State<ImageList> {
       mainAxisSpacing: 4.0,
       crossAxisSpacing: 4.0,
     );
-
-  }
-
-  onFavoritePressed(int index) async {
-    final model = models[index];
-    String photoId = model.photoId;
-
-    if (!model.liked_by_user) {
-      _photoRepo.likePhoto(photoId).then((_) {
-        setState(() {
-          model.liked_by_user = true;
-        });
-      });
-    } else {
-      _photoRepo.unlikePhoto(photoId).then((_) {
-        setState(() {
-          model.liked_by_user = false;
-        });
-      });
-    }
   }
 
   void _fetchMoreData() async {
@@ -169,10 +150,10 @@ class _ImageListState extends State<ImageList> {
             currentPage, widget.collectionId);
       } else if (widget.isSearch) {
         newModels = await _photoRepo.searchPhotos(currentPage, widget.query);
-      }
-      else if (widget.isPhotoUserProfile) {
-        newModels = await _photoRepo.fetchUsersPhotos(widget.userName, currentPage);
-      }else {
+      } else if (widget.isPhotoUserProfile) {
+        newModels =
+            await _photoRepo.fetchUsersPhotos(widget.userName, currentPage);
+      } else {
         newModels = await _photoRepo.fetchPhotos(currentPage);
       }
       // check if return data is empty
@@ -200,8 +181,72 @@ class _ImageListState extends State<ImageList> {
         context,
         MaterialPageRoute(
             builder: (context) => PhotoDetailsScreen(
-                model, _photoRepo, widget.sharedPreferences,model.photoId))
+                model, _photoRepo, widget.sharedPreferences, model.photoId)));
+  }
 
-    );
+  onFavoritePressed(int index) async {
+    final model = models[index];
+    String photoId = model.photoId;
+
+    bool isLoggedIn =
+        widget.sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false;
+
+    if (!isLoggedIn) {
+      _loginModalSheet();
+      return;
+    }
+
+    if (!model.liked_by_user) {
+      _photoRepo.likePhoto(photoId).then((_) {
+        setState(() {
+          model.liked_by_user = true;
+        });
+      });
+    } else {
+      _photoRepo.unlikePhoto(photoId).then((_) {
+        setState(() {
+          model.liked_by_user = false;
+        });
+      });
+    }
+  }
+
+  _launchURL() async {
+    var loginUrl = Constants.loginUrl;
+    if (await canLaunch(loginUrl)) {
+      await launch(loginUrl);
+    } else {
+      throw 'Could not launch $loginUrl';
+    }
+  }
+
+  void _loginModalSheet() {
+    showModalBottomSheet(
+        context: context,
+        builder: (builder) {
+          return Container(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('Sign up, it`s free!',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Padding(padding: EdgeInsets.all(8)),
+                  Text(
+                      'In order to like and download your favorite photos, you have to sign up first.'),
+                  Padding(padding: EdgeInsets.all(12)),
+                  Center(
+                      child: FlatButton(
+                    padding: EdgeInsets.symmetric(horizontal: 50),
+                    onPressed: _launchURL,
+                    child: Text('Sign up or log in'),
+                    color: Colors.orange,
+                    textColor: Colors.white,
+                  ))
+                ],
+              ));
+        });
   }
 }

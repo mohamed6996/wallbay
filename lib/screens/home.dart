@@ -172,7 +172,7 @@ class _MainTabsState extends State<MainTabs> {
   Future<void> _initTabs() async {
     mainFeedTab = MainFeedTab(keyMainFeed, widget.preferences);
     collectionsTab = CollectionsTab(keyCollections, widget.preferences);
-    favoritesTab = FavoritesTab(keyFavorites, widget.preferences);
+    favoritesTab = FavoritesTab(keyFavorites, widget.preferences, isLogedin: widget.preferences.getBool(Constants.OAUTH_LOGED_IN) ??false,);
     settingsTab = SettingsTab();
 
     pages = [mainFeedTab, collectionsTab, favoritesTab, settingsTab];
