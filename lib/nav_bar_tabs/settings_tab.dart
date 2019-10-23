@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wallbay/utils/shared_prefs.dart';
+import 'package:provider/provider.dart';
+import 'package:wallbay/bloc/main_provider.dart';
 
 class SettingsTab extends StatefulWidget {
   @override
@@ -9,6 +10,7 @@ class SettingsTab extends StatefulWidget {
 class _SettingsTabState extends State<SettingsTab> {
   @override
   Widget build(BuildContext context) {
+    PreferencesProvider mainProvider = Provider.of<PreferencesProvider>(context);
     return Scaffold(
       appBar: AppBar(title: Text('Settings')),
       body: SingleChildScrollView(
@@ -30,7 +32,7 @@ class _SettingsTabState extends State<SettingsTab> {
                     await showDialog(
                         context: context,
                         builder: (context) {
-                          return PickTypeDialog();
+                          return PickTypeDialog(mainProvider);
                         });
                   },
                 ),
@@ -49,7 +51,7 @@ class _SettingsTabState extends State<SettingsTab> {
                     await showDialog(
                         context: context,
                         builder: (context) {
-                          return CollectionType();
+                          return CollectionType(mainProvider);
                         });
                   },
                 ),
@@ -94,6 +96,8 @@ class _SettingsTabState extends State<SettingsTab> {
 }
 
 class PickTypeDialog extends StatefulWidget {
+  final PreferencesProvider mainProvider;
+  PickTypeDialog(this.mainProvider);
   @override
   _PickTypeDialogState createState() => _PickTypeDialogState();
 }
@@ -101,14 +105,13 @@ class PickTypeDialog extends StatefulWidget {
 class _PickTypeDialogState extends State<PickTypeDialog> {
   int _radioValue = 0;
 
+  PreferencesProvider _mainProvider;
+
   @override
-  void initState() {
-    super.initState();
-    var value = SharedPrefs.loadSavedLayout();
-    if (value != null) {
-      _radioValue = value;
-    }
-    print('saved prefs: $_radioValue');
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _mainProvider = widget.mainProvider;
+    _radioValue = _mainProvider.layoutType;
   }
 
   @override
@@ -127,7 +130,8 @@ class _PickTypeDialogState extends State<PickTypeDialog> {
               onChanged: (value) {
                 setState(() {
                   _radioValue = value;
-                  SharedPrefs.saveLayout(value);
+                  _mainProvider.layoutType = value;
+                  //  SharedPrefs.saveLayout(value);
                   Navigator.of(context).pop();
                 });
               }),
@@ -138,7 +142,8 @@ class _PickTypeDialogState extends State<PickTypeDialog> {
               onChanged: (value) {
                 setState(() {
                   _radioValue = value;
-                  SharedPrefs.saveLayout(value);
+                  _mainProvider.layoutType = value;
+                  //  SharedPrefs.saveLayout(value);
                   Navigator.of(context).pop();
                 });
               }),
@@ -149,7 +154,8 @@ class _PickTypeDialogState extends State<PickTypeDialog> {
               onChanged: (value) {
                 setState(() {
                   _radioValue = value;
-                  SharedPrefs.saveLayout(value);
+                  _mainProvider.layoutType = value;
+                  //SharedPrefs.saveLayout(value);
                   Navigator.of(context).pop();
                 });
               }),
@@ -160,20 +166,21 @@ class _PickTypeDialogState extends State<PickTypeDialog> {
 }
 
 class CollectionType extends StatefulWidget {
+  final PreferencesProvider mainProvider;
+  CollectionType(this.mainProvider);
   @override
   _CollectionTypeState createState() => _CollectionTypeState();
 }
 
 class _CollectionTypeState extends State<CollectionType> {
   int _radioValue = 0;
+  PreferencesProvider _mainProvider;
 
   @override
-  void initState() {
-    super.initState();
-    var value = SharedPrefs.loadSavedCollection();
-    if (value != null) {
-      _radioValue = value;
-    }
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _mainProvider = widget.mainProvider;
+    _radioValue = _mainProvider.collectionType;
   }
 
   @override
@@ -192,7 +199,8 @@ class _CollectionTypeState extends State<CollectionType> {
               onChanged: (value) {
                 setState(() {
                   _radioValue = value;
-                  SharedPrefs.saveCollection(value);
+                  _mainProvider.collectionType = value;
+                  //SharedPrefs.saveCollection(value);
                   Navigator.of(context).pop();
                 });
               }),
@@ -203,7 +211,8 @@ class _CollectionTypeState extends State<CollectionType> {
               onChanged: (value) {
                 setState(() {
                   _radioValue = value;
-                  SharedPrefs.saveCollection(value);
+                  _mainProvider.collectionType = value;
+                  // SharedPrefs.saveCollection(value);
                   Navigator.of(context).pop();
                 });
               }),

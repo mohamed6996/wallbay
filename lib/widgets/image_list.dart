@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wallbay/bloc/main_provider.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/screens/photo_details_screen.dart';
@@ -10,7 +12,6 @@ import 'package:wallbay/widgets/image_card.dart';
 
 class ImageList extends StatefulWidget {
   final List<PhotoModel> models;
-  final SharedPreferences sharedPreferences;
   final isFavoriteTab;
   final bool isCollectionPhotos;
   final bool isSearch;
@@ -22,7 +23,6 @@ class ImageList extends StatefulWidget {
   ImageList(
       {Key key,
       this.models,
-      this.sharedPreferences,
       this.isFavoriteTab,
       this.isCollectionPhotos = false,
       this.isSearch = false,
@@ -54,8 +54,6 @@ class _ImageListState extends State<ImageList> {
       }
     });
 
-    // initSharedPref();
-    _photoRepo = new PhotoRepository(widget.sharedPreferences);
     super.initState();
   }
 
@@ -67,7 +65,8 @@ class _ImageListState extends State<ImageList> {
 
   @override
   Widget build(BuildContext context) {
-    int layout = SharedPrefs.loadSavedLayout() ?? 0;
+     final PreferencesProvider mainProvider = Provider.of<PreferencesProvider>(context);
+    int layout = mainProvider.layoutType;
 
     if (layout == 0)
       return _buildListView(models, _scrollController);
@@ -92,12 +91,10 @@ class _ImageListState extends State<ImageList> {
                 );
               } else {
                 return GestureDetector(
-                  onTap: () {
-                    onImagePressed(models[index]);
-                  },
-                  child: ImageCard(
-                    models[index])
-                );
+                    onTap: () {
+                      onImagePressed(models[index]);
+                    },
+                    child: ImageCard(models[index]));
               }
             }));
   }
@@ -120,8 +117,7 @@ class _ImageListState extends State<ImageList> {
             onTap: () {
               onImagePressed(models[index]);
             },
-            child: GridItemView(
-              models[index]),
+            child: GridItemView(models[index]),
           );
         }
       },
@@ -134,7 +130,6 @@ class _ImageListState extends State<ImageList> {
 
   Widget _buildStaggeredGridView(
       List<PhotoModel> models, ScrollController scrollController) {
-    print('staggedred called');
     return StaggeredGridView.countBuilder(
       key: PageStorageKey("gridKey"),
       controller: scrollController,
@@ -210,7 +205,6 @@ class _ImageListState extends State<ImageList> {
         context,
         MaterialPageRoute(
             builder: (context) => PhotoDetailsScreen(
-                model, _photoRepo, widget.sharedPreferences, model.photoId)));
+                model, model.photoId)));
   }
-
 }

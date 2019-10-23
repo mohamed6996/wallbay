@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:async/async.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wallbay/bloc/main_provider.dart';
 import 'package:wallbay/repository/photo_repository.dart';
-import 'package:wallbay/utils/shared_prefs.dart';
 import 'package:wallbay/widgets/image_list.dart';
 
 
@@ -20,10 +22,11 @@ class _CollectionPhotosState extends State<CollectionPhotos> {
   final _memoizer = AsyncMemoizer();
   @override
   Widget build(BuildContext context) {
+    final PreferencesProvider mainProvider = Provider.of<PreferencesProvider>(context);
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
         body: FutureBuilder(
-            future: _fetchData(),
+            future: _fetchData(mainProvider.sharedPrefs),
             builder: (context, snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
@@ -36,11 +39,8 @@ class _CollectionPhotosState extends State<CollectionPhotos> {
                   if (snapshot.hasError) {
                     return Center(child: Text("Error: ${snapshot.error}"));
                   } else {
-
-                    //return Center(child: Text(snapshot.data.toString()),);
                     return ImageList(
                       models: snapshot.data,
-                     // sharedPreferences: sharedPreferences,
                       isFavoriteTab: false,
                       isCollectionPhotos: true,
                       collectionId: widget.id,
@@ -51,10 +51,9 @@ class _CollectionPhotosState extends State<CollectionPhotos> {
     );
   }
 
-  _fetchData() async {
-    return _memoizer.runOnce(() async {
-      var prefs = await SharedPrefs.getPrefs();
-      return PhotoRepository(prefs).fetchCollectionPhotos(1,widget.id);
+  _fetchData(SharedPreferences sharedPrefs) async {
+    return _memoizer.runOnce(() async {      
+      return repository.fetchCollectionPhotos(1,widget.id);
     });
   }
 }

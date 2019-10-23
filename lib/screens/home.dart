@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:wallbay/bloc/main_provider.dart';
 import 'package:wallbay/constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:wallbay/nav_bar_tabs/favorites_tab.dart';
@@ -12,30 +14,19 @@ import 'package:uni_links/uni_links.dart';
 import 'package:wallbay/model/access_token.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
-import 'package:wallbay/utils/shared_prefs.dart';
+import 'package:wallbay/utils/colors.dart';
 
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final PreferencesProvider mainProvider =
+        Provider.of<PreferencesProvider>(context);
     return FutureBuilder(
-        future: _initSharedPref(),
+        future: mainProvider.initSharedPrefs(),
         builder: (context, AsyncSnapshot<SharedPreferences> snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.done:
-              if (snapshot.hasData) {
-                return MainTabs(snapshot.data);
-              } else {
-                return Container();
-              }
-              break;
-            default:
-              return Container();
-          }
+          if (!snapshot.hasData) return Container();
+          return MainTabs(snapshot.data);
         });
-  }
-
-  Future<SharedPreferences> _initSharedPref() async {
-    return SharedPrefs.getPrefs();
   }
 }
 
@@ -86,12 +77,9 @@ class _MainTabsState extends State<MainTabs> {
         bucket: bucket,
       ),
 
-//      body: IndexedStack(
-//        index: currentTab,
-//        children: pages,
-//      ),
 
       bottomNavigationBar: BottomNavyBar(
+        showElevation: true,
         selectedIndex: currentTab,
         onItemSelected: (index) => setState(() {
           currentTab = index;
@@ -101,26 +89,23 @@ class _MainTabsState extends State<MainTabs> {
           BottomNavyBarItem(
               icon: Icon(Icons.trending_up),
               title: Text('Trending'),
-              activeColor: Colors.black,
-              inactiveColor: Colors.black),
+              activeColor: kactiveColor,
+              inactiveColor: kinactiveColor),
           BottomNavyBarItem(
-            icon: Icon(Icons.layers),
-            title: Text('Collections'),
-            inactiveColor: Colors.black,
-            activeColor: Colors.black,
-          ),
+              icon: Icon(Icons.layers),
+              title: Text('Collections'),
+              activeColor: kactiveColor,
+              inactiveColor: kinactiveColor),
           BottomNavyBarItem(
-            icon: Icon(Icons.favorite),
-            title: Text('Favorites'),
-            inactiveColor: Colors.black,
-            activeColor: Colors.black,
-          ),
+              icon: Icon(Icons.favorite),
+              title: Text('Favorites'),
+              activeColor: kactiveColor,
+              inactiveColor: kinactiveColor),
           BottomNavyBarItem(
-            icon: Icon(Icons.settings),
-            title: Text('Settings'),
-            inactiveColor: Colors.black,
-            activeColor: Colors.black,
-          ),
+              icon: Icon(Icons.settings),
+              title: Text('Settings'),
+              activeColor: kactiveColor,
+              inactiveColor: kinactiveColor),
         ],
       ),
     );
@@ -170,9 +155,11 @@ class _MainTabsState extends State<MainTabs> {
   }
 
   Future<void> _initTabs() async {
-    mainFeedTab = MainFeedTab(keyMainFeed, widget.preferences);
-    collectionsTab = CollectionsTab(keyCollections, widget.preferences);
-    favoritesTab = FavoritesTab(keyFavorites, widget.preferences, isLogedin: widget.preferences.getBool(Constants.OAUTH_LOGED_IN) ??false,);
+    mainFeedTab = MainFeedTab(keyMainFeed);
+    collectionsTab = CollectionsTab(keyCollections);
+    favoritesTab = FavoritesTab(keyFavorites,
+        isLogedin:
+            widget.preferences.getBool(Constants.OAUTH_LOGED_IN) ?? false);
     settingsTab = SettingsTab();
 
     pages = [mainFeedTab, collectionsTab, favoritesTab, settingsTab];

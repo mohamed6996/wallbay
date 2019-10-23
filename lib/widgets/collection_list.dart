@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallbay/model/collection_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/widgets/collection_card.dart';
 
 class CollectionList extends StatefulWidget {
   final List<CollectionModel> models;
-  final SharedPreferences sharedPreferences;
   final bool userCollection;
   final bool isWallpaper;
 
   CollectionList(
       {Key key,
       this.models,
-      this.sharedPreferences,
       this.userCollection = false, this.isWallpaper = false})
       : super(key: key);
 
@@ -40,8 +37,7 @@ class _CollectionListState extends State<CollectionList> {
       }
     });
 
-    // initSharedPref();
-    _photoRepo = new PhotoRepository(widget.sharedPreferences);
+
     super.initState();
   }
 

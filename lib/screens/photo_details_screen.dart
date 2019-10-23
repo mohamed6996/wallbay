@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as prefix0;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 import 'package:unicorndial/unicorndial.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wallbay/bloc/main_provider.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/screens/photo_user_profile.dart';
@@ -18,13 +18,11 @@ import '../constants.dart';
 
 class PhotoDetailsScreen extends StatefulWidget {
   final PhotoModel model;
-  final PhotoRepository photoRepository;
-  final SharedPreferences sharedPreferences;
   final String heroTag;
   final platform = const MethodChannel('wallbay/imageDownloader');
 
   PhotoDetailsScreen(
-      this.model, this.photoRepository, this.sharedPreferences, this.heroTag);
+      this.model, this.heroTag);
 
   @override
   _PhotoDetailsScreenState createState() => _PhotoDetailsScreenState();
@@ -35,6 +33,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isFabVisible = true, isSheetVisible = false;
   Widget w;
+
+    PreferencesProvider mainProvider;
 
   void fabDialChildren() {
     childButtons.add(UnicornButton(
@@ -115,22 +115,22 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   onFavoritePressed() async {
     String photoId = widget.model.photoId;
 
-    bool isLoggedIn =
-        widget.sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false;
+    // bool isLoggedIn =
+    //   mainProvider.sharedPrefs.getBool(Constants.OAUTH_LOGED_IN) ?? false;
 
-    if (!isLoggedIn) {
-      _loginModalSheet();
-      return;
-    }
+    // if (!isLoggedIn) {
+    //   _loginModalSheet();
+    //   return;
+    // }
 
     if (!widget.model.liked_by_user) {
-      widget.photoRepository.likePhoto(photoId).then((_) {
+      repository.likePhoto(photoId).then((_) {
         setState(() {
           widget.model.liked_by_user = true;
         });
       });
     } else {
-      widget.photoRepository.unlikePhoto(photoId).then((_) {
+     repository.unlikePhoto(photoId).then((_) {
         setState(() {
           widget.model.liked_by_user = false;
         });
@@ -143,11 +143,18 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
     super.initState();
     fabDialChildren();
     w = PhotoUserProfile(
-        widget.model, widget.photoRepository, widget.sharedPreferences);
+        widget.model);
   }
+
+  // @override
+  // void didChangeDependencies() {
+  //  mainProvider = Provider.of<MainProvider>(context);
+  //   super.didChangeDependencies();
+  // }
 
   @override
   Widget build(BuildContext context) {
+     mainProvider = Provider.of<PreferencesProvider>(context,listen: false);
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.black,
@@ -222,68 +229,68 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
           )),
     );
 
-    Scaffold(
-      key: _scaffoldKey,
-      floatingActionButton: Theme(
-        data: ThemeData(
-            accentIconTheme: IconThemeData(color: Colors.white),
-            accentColor: Colors.orange),
-        child: Visibility(
-          visible: isFabVisible,
-          child: UnicornDialer(
-              orientation: UnicornOrientation.VERTICAL,
-              parentButton: Icon(Icons.menu),
-              childButtons: childButtons),
-        ),
-      ),
-      body: Stack(
-        children: <Widget>[
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: CachedNetworkImage(
-              height: MediaQuery.of(context).size.height,
-              fit: BoxFit.fill,
-              imageUrl: widget.model.regularPhotoUrl,
-            ),
-          ),
-          Positioned(
-              bottom: 0,
-              height: 85,
-              width: MediaQuery.of(context).size.width,
-              child: Container(
-                color: Colors.black.withOpacity(0.65),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16, top: 0, bottom: 0),
-                  child: Row(
-                    children: <Widget>[
-                      _circleImage(widget.model.mediumProfilePhotoUrl, 40),
-                      Padding(padding: EdgeInsets.only(left: 10.0)),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            widget.model.name,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Padding(padding: EdgeInsets.all(2)),
-                          Text('Unsplash.com',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.normal))
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              )),
-        ],
-      ),
-    );
+    // Scaffold(
+    //   key: _scaffoldKey,
+    //   floatingActionButton: Theme(
+    //     data: ThemeData(
+    //         accentIconTheme: IconThemeData(color: Colors.white),
+    //         accentColor: Colors.orange),
+    //     child: Visibility(
+    //       visible: isFabVisible,
+    //       child: UnicornDialer(
+    //           orientation: UnicornOrientation.VERTICAL,
+    //           parentButton: Icon(Icons.menu),
+    //           childButtons: childButtons),
+    //     ),
+    //   ),
+    //   body: Stack(
+    //     children: <Widget>[
+    //       SingleChildScrollView(
+    //         scrollDirection: Axis.horizontal,
+    //         child: CachedNetworkImage(
+    //           height: MediaQuery.of(context).size.height,
+    //           fit: BoxFit.fill,
+    //           imageUrl: widget.model.regularPhotoUrl,
+    //         ),
+    //       ),
+    //       Positioned(
+    //           bottom: 0,
+    //           height: 85,
+    //           width: MediaQuery.of(context).size.width,
+    //           child: Container(
+    //             color: Colors.black.withOpacity(0.65),
+    //             child: Padding(
+    //               padding: const EdgeInsets.only(left: 16, top: 0, bottom: 0),
+    //               child: Row(
+    //                 children: <Widget>[
+    //                   _circleImage(widget.model.mediumProfilePhotoUrl, 40),
+    //                   Padding(padding: EdgeInsets.only(left: 10.0)),
+    //                   Column(
+    //                     mainAxisAlignment: MainAxisAlignment.center,
+    //                     crossAxisAlignment: CrossAxisAlignment.start,
+    //                     children: <Widget>[
+    //                       Text(
+    //                         widget.model.name,
+    //                         style: TextStyle(
+    //                             color: Colors.white,
+    //                             fontSize: 18,
+    //                             fontWeight: FontWeight.bold),
+    //                       ),
+    //                       Padding(padding: EdgeInsets.all(2)),
+    //                       Text('Unsplash.com',
+    //                           style: TextStyle(
+    //                               color: Colors.white,
+    //                               fontSize: 11,
+    //                               fontWeight: FontWeight.normal))
+    //                     ],
+    //                   ),
+    //                 ],
+    //               ),
+    //             ),
+    //           )),
+    //     ],
+    //   ),
+    // );
   }
 
   Widget _circleImage(String url, double size) {
@@ -434,91 +441,3 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   }
 }
 
-//todo to be deleted
-class SetWallPaper extends StatefulWidget {
-  final String url;
-
-  SetWallPaper(this.url);
-
-  @override
-  _SetWallPaperState createState() => _SetWallPaperState();
-}
-
-class _SetWallPaperState extends State<SetWallPaper> {
-  bool isDownloading = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-        title: Text('Set Wallpaper'),
-        content: isDownloading == false
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                    _listItem('Home Screen', Icons.home, () {
-                      setState(() {
-                        isDownloading = true;
-                      });
-
-                      Wallpaper.ImageDownloadProgress(widget.url)
-                          .listen((data) {}, onDone: () {
-                        //  await Wallpaper.homeScreen();
-                        print('calllllled');
-                        //  Navigator.of(context).pop();
-                        //  isDownloading = false;
-                      });
-                    }),
-                    _listItem('Lock Screen', Icons.lock, () {
-                      Wallpaper.ImageDownloadProgress(widget.url).listen(
-                          (data) {
-                        setState(() {
-                          isDownloading = true;
-                        });
-                      }, onDone: () async {
-                        await Wallpaper.lockScreen();
-                        Navigator.of(context).pop();
-                        isDownloading = false;
-                      });
-                    }),
-                    _listItem('Both', Icons.phone_android, () {
-                      Wallpaper.ImageDownloadProgress(widget.url).listen(
-                          (data) {
-                        setState(() {
-                          isDownloading = true;
-                        });
-                      }, onDone: () async {
-                        await Wallpaper.homeScreen();
-                        await Wallpaper.lockScreen();
-                        Navigator.of(context).pop();
-                        isDownloading = false;
-                      });
-                    })
-                  ])
-            : Container(
-                height: 100,
-                child: Center(child: CircularProgressIndicator())));
-  }
-
-  _listItem(String desc, IconData icon, VoidCallback callback) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          callback();
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            children: <Widget>[
-              Icon(icon, color: Colors.orange),
-              Padding(padding: EdgeInsets.symmetric(horizontal: 8)),
-              Text(desc),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

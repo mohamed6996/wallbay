@@ -14,13 +14,35 @@ import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/model/photo_response.dart';
 import 'package:dio/dio.dart';
 
-class PhotoRepository extends Repository {
-  final SharedPreferences _sharedPreferences;
-  Dio dio;
+PhotoRepository repository = PhotoRepository.instance;
 
-  PhotoRepository(this._sharedPreferences) {
+class PhotoRepository extends Repository {
+  static SharedPreferences _sharedPreferences;
+  static Dio dio;
+  static PhotoRepository instance;
+
+  PhotoRepository._();
+
+  static Future<PhotoRepository> create() async {
+    PhotoRepository repository = PhotoRepository._();
+    _sharedPreferences = await SharedPreferences.getInstance();
     dio = new Dio();
+    instance = repository;
+    return repository;
   }
+
+  // static final PhotoRepository instance = PhotoRepository.init();
+
+  // factory PhotoRepository(){
+  //   return instance;
+  // }
+
+  // PhotoRepository.init() {
+  //   dio = new Dio();
+  //   SharedPreferences.getInstance().then((prefs) {
+  //     this._sharedPreferences = prefs;
+  //   });
+  // }
 
   @override
   Future<List<PhotoModel>> fetchPhotos(int pageNumber) async {

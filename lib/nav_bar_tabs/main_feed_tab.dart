@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wallbay/bloc/main_provider.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:async/async.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -7,12 +9,12 @@ import 'package:wallbay/widgets/image_list.dart';
 
 class MainFeedTab extends StatelessWidget {
   final _memoizer = AsyncMemoizer();
-  final SharedPreferences sharedPreferences;
 
-  MainFeedTab(Key key, this.sharedPreferences) : super(key: key);
+  MainFeedTab(Key key) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final PreferencesProvider mainProvider = Provider.of<PreferencesProvider>(context,listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Text('Wallbay'),
@@ -20,7 +22,7 @@ class MainFeedTab extends StatelessWidget {
           IconButton(
             onPressed: () {
               showSearch(
-                  context: context, delegate: DataSearch(sharedPreferences));
+                  context: context, delegate: DataSearch(mainProvider.sharedPrefs));
             },
             tooltip: 'Search',
             icon: new Icon(Icons.search),
@@ -43,21 +45,18 @@ class MainFeedTab extends StatelessWidget {
                 } else {
                   return ImageList(
                     models: snapshot.data,
-                    sharedPreferences: sharedPreferences,
                     isFavoriteTab: false,
                   );
                 }
             }
           }),
     );
-
-
-
   }
 
   _fetchData() async {
     return _memoizer.runOnce(() async {
-      return PhotoRepository(sharedPreferences).fetchPhotos(1);
+      print('main called');
+      return repository.fetchPhotos(1);
     });
   }
 }
@@ -68,7 +67,7 @@ class DataSearch extends SearchDelegate<String> {
   DataSearch(this.sharedPreferences);
 
   _fetchData() async {
-    return PhotoRepository(sharedPreferences).searchPhotos(1, query);
+    return repository.searchPhotos(1, query);
   }
 
   @override
@@ -127,7 +126,6 @@ class DataSearch extends SearchDelegate<String> {
                   } else {
                     return ImageList(
                       models: snapshot.data,
-                      sharedPreferences: sharedPreferences,
                       isFavoriteTab: false,
                       isSearch: true,
                       query: query,
