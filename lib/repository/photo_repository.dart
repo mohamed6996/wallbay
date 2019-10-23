@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallbay/constants.dart';
 import 'package:wallbay/model/collectionSearchResponse.dart';
@@ -10,13 +8,10 @@ import 'package:wallbay/model/me_model.dart';
 import 'package:wallbay/model/me_response.dart';
 import 'package:wallbay/model/photo_details_model.dart';
 import 'package:wallbay/model/photo_details_response.dart';
-import 'package:wallbay/model/photo_search_model.dart';
 import 'package:wallbay/model/photo_search_response.dart';
 import 'package:wallbay/repository/Repository.dart';
-import 'package:wallbay/constants.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/model/photo_response.dart';
-import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 
 class PhotoRepository extends Repository {
@@ -149,10 +144,6 @@ class PhotoRepository extends Repository {
     List<PhotoModel> models = list.responseList
         .map((photoResponse) => PhotoModel.fromPhotoResponse(photoResponse))
         .toList();
-
-    print(models.length);
-
-    print(response.data.toString());
 
     return models;
   }

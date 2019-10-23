@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as prefix0;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unicorndial/unicorndial.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/screens/photo_user_profile.dart';
@@ -10,6 +12,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:image_downloader/image_downloader.dart';
 import 'package:wallpaper/wallpaper.dart';
 import 'package:flutter/services.dart';
+import 'package:photo_view/photo_view.dart';
+
+import '../constants.dart';
 
 class PhotoDetailsScreen extends StatefulWidget {
   final PhotoModel model;
@@ -98,15 +103,38 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
       }
 
       var path = await ImageDownloader.findPath(imageId);
-      //  var fileName = await ImageDownloader.findName(imageId);
-      //  var size = await ImageDownloader.findByteSize(imageId);
-      //  var mimeType = await ImageDownloader.findMimeType(imageId);
 
       if (isWallpaper) {
         await widget.platform.invokeMethod('setWallpaper', path);
       }
     } catch (error) {
       print(error);
+    }
+  }
+
+  onFavoritePressed() async {
+    String photoId = widget.model.photoId;
+
+    bool isLoggedIn =
+        widget.sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false;
+
+    if (!isLoggedIn) {
+      _loginModalSheet();
+      return;
+    }
+
+    if (!widget.model.liked_by_user) {
+      widget.photoRepository.likePhoto(photoId).then((_) {
+        setState(() {
+          widget.model.liked_by_user = true;
+        });
+      });
+    } else {
+      widget.photoRepository.unlikePhoto(photoId).then((_) {
+        setState(() {
+          widget.model.liked_by_user = false;
+        });
+      });
     }
   }
 
@@ -121,6 +149,80 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: Colors.black,
+      appBar: AppBar(backgroundColor: Colors.transparent),
+      body: Center(
+        child: PhotoView(
+            heroTag:widget.model.photoId,
+            initialScale: PhotoViewComputedScale.contained,
+            minScale: PhotoViewComputedScale.contained,
+            imageProvider:
+                CachedNetworkImageProvider(widget.model.regularPhotoUrl),
+          ),
+      ),
+      bottomNavigationBar: Container(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          color: Colors.transparent,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              GestureDetector(
+                onTap: (){
+                  _showModalSheet();
+                },
+                child: Row(
+                  children: <Widget>[
+                    _circleImage(widget.model.mediumProfilePhotoUrl, 40),
+                    Padding(padding: EdgeInsets.only(left: 10.0)),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text(
+                          widget.model.name,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        Padding(padding: EdgeInsets.all(2)),
+                        Text('Unsplash.com',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.normal))
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                children: <Widget>[
+                  IconButton(
+                      padding: EdgeInsets.all(0),
+                      icon: Icon(Icons.file_download, color: Colors.white),
+                      onPressed: () {}),
+                  IconButton(
+                      icon: Icon(Icons.info_outline, color: Colors.white),
+                      onPressed: () {
+                        _showModalSheet();
+                      }),
+                  IconButton(
+                      icon: widget.model.liked_by_user
+                          ? Icon(Icons.favorite, color: Colors.red)
+                          : Icon(Icons.favorite_border, color: Colors.white),
+                      onPressed: () {
+                        onFavoritePressed();
+                      }),
+                ],
+              )
+            ],
+          )),
+    );
+
+    Scaffold(
       key: _scaffoldKey,
       floatingActionButton: Theme(
         data: ThemeData(
@@ -249,6 +351,45 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
         });
   }
 
+  void _loginModalSheet() {
+    showModalBottomSheet(
+        context: context,
+        builder: (builder) {
+          return Container(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('Sign up, it`s free!',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Padding(padding: EdgeInsets.all(8)),
+                  Text(
+                      'In order to like and download your favorite photos, you have to sign up first.'),
+                  Padding(padding: EdgeInsets.all(12)),
+                  Center(
+                      child: FlatButton(
+                    padding: EdgeInsets.symmetric(horizontal: 50),
+                    onPressed: _launchURL,
+                    child: Text('Sign up or log in'),
+                    color: Colors.orange,
+                    textColor: Colors.white,
+                  ))
+                ],
+              ));
+        });
+  }
+
+  _launchURL() async {
+    var loginUrl = Constants.loginUrl;
+    if (await canLaunch(loginUrl)) {
+      await launch(loginUrl);
+    } else {
+      throw 'Could not launch $loginUrl';
+    }
+  }
+
   void _showBottomSheet() {
     setState(() {
       isFabVisible = false;
@@ -293,8 +434,6 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   }
 }
 
-
-
 //todo to be deleted
 class SetWallPaper extends StatefulWidget {
   final String url;
@@ -307,6 +446,7 @@ class SetWallPaper extends StatefulWidget {
 
 class _SetWallPaperState extends State<SetWallPaper> {
   bool isDownloading = false;
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(

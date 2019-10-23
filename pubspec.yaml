@@ -29,6 +29,9 @@ dependencies:
   permission_handler: ^3.2.0
   image_downloader: ^0.18.1
   wallpaper: ^1.0.0
+  sqflite: ^1.1.6
+  photo_view: ^0.4.2
+  provider: ^3.1.0+1
 
 
 

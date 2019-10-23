@@ -4,39 +4,40 @@ import 'package:wallbay/model/photo_model.dart';
 
 class ImageCard extends StatelessWidget {
   final PhotoModel photoModel;
-  final VoidCallback onFavoritePressed;
 
-  ImageCard(this.photoModel, this.onFavoritePressed);
+  ImageCard(this.photoModel);
 
   @override
-  Widget build(BuildContext context) {
-    return new Card(
+  Widget build(BuildContext context){
+    return Card(
       child: Column(
         children: <Widget>[
           AspectRatio(
             aspectRatio: photoModel.width / photoModel.height,
-            child: CachedNetworkImage(
-              fit: BoxFit.cover,
-              imageUrl: photoModel.regularPhotoUrl,
-              errorWidget: (context, String s, o) {
-                return Icon(Icons.error);
-              },
-              placeholder: (context, String err) {
-                print(err);
-                return AspectRatio(
-                  aspectRatio: photoModel.width / photoModel.height,
-                  child: DecoratedBox(
-                      child: Center(
-                          child: CircularProgressIndicator(
-                        valueColor:
-                            new AlwaysStoppedAnimation<Color>(Colors.white),
-                        strokeWidth: 0.5,
-                      )),
-                      decoration: BoxDecoration(
-                          color: Color(int.parse(
-                              "0xFF${photoModel.color.substring(1)}")))),
-                );
-              },
+            child: Hero(
+              tag: photoModel.photoId,
+              child: CachedNetworkImage(
+                fit: BoxFit.cover,
+                imageUrl: photoModel.regularPhotoUrl,
+                errorWidget: (context, String s, o) {
+                  return Icon(Icons.error);
+                },
+                placeholder: (context, String err) {
+                  return AspectRatio(
+                    aspectRatio: photoModel.width / photoModel.height,
+                    child: DecoratedBox(
+                        child: Center(
+                            child: CircularProgressIndicator(
+                          valueColor:
+                              new AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 0.5,
+                        )),
+                        decoration: BoxDecoration(
+                            color: Color(int.parse(
+                                "0xFF${photoModel.color.substring(1)}")))),
+                  );
+                },
+              ),
             ),
           ),
           Row(
@@ -54,20 +55,6 @@ class ImageCard extends StatelessWidget {
                         ),
                       ],
                     )),
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: Row(
-                    children: <Widget>[
-                      Padding(padding: EdgeInsets.only(left: 10.0)),
-                      IconButton(
-                        icon: Icon(photoModel.liked_by_user
-                            ? Icons.favorite
-                            : Icons.favorite_border),
-                        onPressed: onFavoritePressed,
-                      ),
-                    ],
-                  ),
-                ),
               ])
         ],
       ),
@@ -95,30 +82,33 @@ class StaggeredWidget extends StatelessWidget {
     return Container(
       child: AspectRatio(
           aspectRatio: photoModel.width / photoModel.height,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: CachedNetworkImage(
-              fit: BoxFit.cover,
-              imageUrl: photoModel.regularPhotoUrl,
-              errorWidget: (context, String s, o) {
-                return Icon(Icons.error);
-              },
-              placeholder: (context, String err) {
-                print(err);
-                return AspectRatio(
-                  aspectRatio: photoModel.width / photoModel.height,
-                  child: DecoratedBox(
-                      child: Center(
-                          child: CircularProgressIndicator(
-                        valueColor:
-                            new AlwaysStoppedAnimation<Color>(Colors.white),
-                        strokeWidth: 0.5,
-                      )),
-                      decoration: BoxDecoration(
-                          color: Color(int.parse(
-                              "0xFF${photoModel.color.substring(1)}")))),
-                );
-              },
+          child: Hero(
+            tag: photoModel.photoId,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: CachedNetworkImage(
+                fit: BoxFit.cover,
+                imageUrl: photoModel.regularPhotoUrl,
+                errorWidget: (context, String s, o) {
+                  return Icon(Icons.error);
+                },
+                placeholder: (context, String err) {
+                  print(err);
+                  return AspectRatio(
+                    aspectRatio: photoModel.width / photoModel.height,
+                    child: DecoratedBox(
+                        child: Center(
+                            child: CircularProgressIndicator(
+                          valueColor:
+                              new AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 0.5,
+                        )),
+                        decoration: BoxDecoration(
+                            color: Color(int.parse(
+                                "0xFF${photoModel.color.substring(1)}")))),
+                  );
+                },
+              ),
             ),
           )),
     );
@@ -127,9 +117,8 @@ class StaggeredWidget extends StatelessWidget {
 
 class GridItemView extends StatelessWidget {
   final PhotoModel photoModel;
-  final VoidCallback onFavoritePressed;
 
-  GridItemView(this.photoModel, this.onFavoritePressed);
+  GridItemView(this.photoModel);
 
   @override
   Widget build(BuildContext context) {
@@ -140,39 +129,34 @@ class GridItemView extends StatelessWidget {
           padding: EdgeInsets.all(4),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: CachedNetworkImage(
-              fit: BoxFit.cover,
-              imageUrl: photoModel.regularPhotoUrl,
-              errorWidget: (context, String s, o) {
-                return Icon(Icons.error);
-              },
-              placeholder: (context, String err) {
-                return SizedBox(
-                  width: double.infinity,
-                  height: 250.0,
-                  child: DecoratedBox(
-                      child: Center(
-                          child: CircularProgressIndicator(
-                        valueColor:
-                            new AlwaysStoppedAnimation<Color>(Colors.white),
-                        strokeWidth: 0.5,
-                      )),
-                      decoration: BoxDecoration(
-                          color: Color(int.parse(
-                              "0xFF${photoModel.color.substring(1)}")))),
-                );
-              },
+            child: Hero(
+              tag: photoModel.photoId,
+              child: CachedNetworkImage(
+                fit: BoxFit.cover,
+                imageUrl: photoModel.regularPhotoUrl,
+                errorWidget: (context, String s, o) {
+                  return Icon(Icons.error);
+                },
+                placeholder: (context, String err) {
+                  return SizedBox(
+                    width: double.infinity,
+                    height: 250.0,
+                    child: DecoratedBox(
+                        child: Center(
+                            child: CircularProgressIndicator(
+                          valueColor:
+                              new AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 0.5,
+                        )),
+                        decoration: BoxDecoration(
+                            color: Color(int.parse(
+                                "0xFF${photoModel.color.substring(1)}")))),
+                  );
+                },
+              ),
             ),
           ),
         ),
-        Positioned(
-            bottom: 0,
-            right: 0,
-            child: IconButton(
-                icon: photoModel.liked_by_user
-                    ? Icon(Icons.favorite, color: Colors.red)
-                    : Icon(Icons.favorite_border, color: Colors.white),
-                onPressed: onFavoritePressed))
       ],
     );
   }

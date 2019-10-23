@@ -25,7 +25,7 @@ class _CollectionsTabState extends State<CollectionsTab> {
   @override
   void initState() {
     super.initState();
-    filter = widget.sharedPreferences.getInt('collection') ?? 0;
+    // filter = widget.sharedPreferences.getInt('collection') ?? 0;
   }
 
   @override
@@ -59,8 +59,8 @@ class _CollectionsTabState extends State<CollectionsTab> {
               case ConnectionState.waiting:
                 return Center(
                     child: SpinKitHourGlass(
-                  color: Colors.purple,
-                ));
+                      color: Colors.purple,
+                    ));
                 break;
               default:
                 if (snapshot.hasError) {
