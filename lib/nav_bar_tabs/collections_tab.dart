@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wallbay/bloc/main_provider.dart';
+import 'package:wallbay/bloc/collection_provider.dart';
+import 'package:wallbay/bloc/pref_provider.dart';
+import 'package:wallbay/model/collection_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:async/async.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -11,11 +12,13 @@ typedef onCollectionSelected = void Function(String filter);
 
 class CollectionsTab extends StatelessWidget {
   CollectionsTab(Key key) : super(key: key);
-  final _allMemoizer = AsyncMemoizer();
-  final _wallpaperMemoizer = AsyncMemoizer();
   @override
   Widget build(BuildContext context) {
-    PreferencesProvider mainProvider = Provider.of<PreferencesProvider>(context);
+    PreferencesProvider preferencesProvider =
+        Provider.of<PreferencesProvider>(context,listen: false);
+    CollectionProvider collectionProvider =
+        Provider.of<CollectionProvider>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Collections'),
@@ -25,52 +28,48 @@ class CollectionsTab extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               child: FilterCollection((value) {
                 if (value == "All") {
-                  mainProvider.collectionType = 0;
+                  preferencesProvider.collectionType = 0;
                 } else {
-                  mainProvider.collectionType = 1;
+                  preferencesProvider.collectionType = 1;
                 }
               }),
             ),
           )
         ],
       ),
-      body: FutureBuilder(
-          future: _fetchData(mainProvider),
-          builder: (context, snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.waiting:
-                return Center(
-                    child: SpinKitHourGlass(
-                  color: Colors.purple,
-                ));
-                break;
-              default:
-                if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
-                } else {
-                  return CollectionList(
-                    models: snapshot.data,
-                    isWallpaper: mainProvider.collectionType == 1 ? true : false,
-                  );
+  
+      body: Consumer<PreferencesProvider>(
+        builder: (context, prefs, child) {
+          return FutureBuilder(
+              future: prefs.collectionType ==0 ?  collectionProvider
+                  .fetchData() :collectionProvider
+                  .fetchWallPaper(),
+              builder:
+                  (context, AsyncSnapshot<List<CollectionModel>> snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting:
+                    return Center(child: CircularProgressIndicator());
+                    break;
+                  default:
+                    if (snapshot.hasError) {
+                      return Center(child: Text("Error: ${snapshot.error}"));
+                    } else {
+                      return Consumer<CollectionProvider>(
+                          builder: (context, provider, child) {
+                        return CollectionList(
+                          models: snapshot.data,
+                        );
+                      });
+                    }
                 }
-            }
-          }),
+              });
+        },
+      ),
     );
   }
 
-  _fetchData(PreferencesProvider mainProvider) async {
-    if (mainProvider.collectionType == 0) {
-      return _allMemoizer.runOnce(() async {
-        return await repository.fetchCollections(1);
-      });
-    } else {
-      return _wallpaperMemoizer.runOnce(() async {
-        return repository.searchCollections(1);
-      });
-    }
-  }
+  
 }
-
 
 class FilterCollection extends StatefulWidget {
   final onCollectionSelected _collectionSelected;

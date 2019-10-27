@@ -31,19 +31,6 @@ class PhotoRepository extends Repository {
     return repository;
   }
 
-  // static final PhotoRepository instance = PhotoRepository.init();
-
-  // factory PhotoRepository(){
-  //   return instance;
-  // }
-
-  // PhotoRepository.init() {
-  //   dio = new Dio();
-  //   SharedPreferences.getInstance().then((prefs) {
-  //     this._sharedPreferences = prefs;
-  //   });
-  // }
-
   @override
   Future<List<PhotoModel>> fetchPhotos(int pageNumber) async {
     String photosUrl = "";
@@ -88,7 +75,7 @@ class PhotoRepository extends Repository {
     PhotoResponseList list;
 
     if (_sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false) {
-      print('if called');
+    
       // https://api.unsplash.com/photos with Authorization: Bearer ACCESS_TOKEN
       photosUrl =
           Constants.BASE_URL + "users/$userName/photos/?page=$pageNumber";
@@ -98,7 +85,6 @@ class PhotoRepository extends Repository {
       var response = await dio.get(photosUrl, options: options);
       list = PhotoResponseList.fromJson(response.data);
     } else {
-      print('else called');
       photosUrl = Constants.BASE_URL +
           "users/$userName/photos/" +
           "?client_id=${Constants.clientId}&page=$pageNumber";

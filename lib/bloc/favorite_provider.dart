@@ -3,15 +3,17 @@ import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:async/async.dart';
 
-class MainProvider extends ChangeNotifier {
+class FavoriteProvider extends ChangeNotifier {
+  String _userName;
+
   final _memoizer = AsyncMemoizer<List<PhotoModel>>();
   int _currentPage = 1;
 
   bool _isFetching = false;
   bool _isFetchingMore = false;
 
-  List<PhotoModel> _photoModelList;
-  List<PhotoModel> _morePhotoModelList;
+  List<PhotoModel> _photoModelList=[];
+  List<PhotoModel> _morePhotoModelList=[];
 
   List<PhotoModel> get photoModelList => _photoModelList;
   bool get isFetching => _isFetching;
@@ -24,20 +26,20 @@ class MainProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
-
-  removeFavorite(PhotoModel photoModel) {
-    int index = _photoModelList
-        .indexWhere((model) => model.photoId == photoModel.photoId);
-    if (index != -1) {
-      _photoModelList.elementAt(index).liked_by_user = false;
-      notifyListeners();
-    }
+  addFavorite(PhotoModel photoModel) {
+    this._photoModelList.insert(0, photoModel);
+    notifyListeners();
   }
 
-  Future<List<PhotoModel>> fetchData() async {
+  removeFavorite(PhotoModel photoModel) {
+    this._photoModelList.remove(photoModel);
+    notifyListeners();
+  }
+
+  Future<List<PhotoModel>> fetchData(String userName) async {
+    this._userName = userName;
     return _memoizer.runOnce(() async {
-      this._photoModelList = await repository.fetchPhotos(1);
+      this._photoModelList = await repository.fetchFavoritePhotos(1, _userName);
       return _photoModelList;
     });
   }
@@ -47,8 +49,8 @@ class MainProvider extends ChangeNotifier {
       _isFetchingMore = true;
       incrementPage();
     }
-
-    _morePhotoModelList = await repository.fetchPhotos(_currentPage);
+    _morePhotoModelList =
+        await repository.fetchFavoritePhotos(_currentPage, _userName);
     //todo check if not empty
     if (_morePhotoModelList.isNotEmpty) {
       _photoModelList.addAll(_morePhotoModelList);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wallbay/bloc/main_provider.dart';
+import 'package:wallbay/bloc/pref_provider.dart';
 
 class SettingsTab extends StatefulWidget {
   @override
@@ -10,7 +10,7 @@ class SettingsTab extends StatefulWidget {
 class _SettingsTabState extends State<SettingsTab> {
   @override
   Widget build(BuildContext context) {
-    PreferencesProvider mainProvider = Provider.of<PreferencesProvider>(context);
+    PreferencesProvider preferencesProvider = Provider.of<PreferencesProvider>(context,listen: false);
     return Scaffold(
       appBar: AppBar(title: Text('Settings')),
       body: SingleChildScrollView(
@@ -32,7 +32,7 @@ class _SettingsTabState extends State<SettingsTab> {
                     await showDialog(
                         context: context,
                         builder: (context) {
-                          return PickTypeDialog(mainProvider);
+                          return PickTypeDialog(preferencesProvider);
                         });
                   },
                 ),
@@ -51,7 +51,7 @@ class _SettingsTabState extends State<SettingsTab> {
                     await showDialog(
                         context: context,
                         builder: (context) {
-                          return CollectionType(mainProvider);
+                          return CollectionType(preferencesProvider);
                         });
                   },
                 ),

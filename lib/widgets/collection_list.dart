@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:provider/provider.dart';
+import 'package:wallbay/bloc/collection_provider.dart';
+import 'package:wallbay/bloc/pref_provider.dart';
 import 'package:wallbay/model/collection_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/widgets/collection_card.dart';
@@ -7,13 +10,12 @@ import 'package:wallbay/widgets/collection_card.dart';
 class CollectionList extends StatefulWidget {
   final List<CollectionModel> models;
   final bool userCollection;
-  final bool isWallpaper;
 
-  CollectionList(
-      {Key key,
-      this.models,
-      this.userCollection = false, this.isWallpaper = false})
-      : super(key: key);
+  CollectionList({
+    Key key,
+    this.models,
+    this.userCollection = false,
+  }) : super(key: key);
 
   @override
   _CollectionListState createState() => _CollectionListState();
@@ -21,11 +23,13 @@ class CollectionList extends StatefulWidget {
 
 class _CollectionListState extends State<CollectionList> {
   List<CollectionModel> models;
-  PhotoRepository _photoRepo;
 
   ScrollController _scrollController = new ScrollController();
   bool isPerformingRequest = false;
   int currentPage = 1;
+
+  CollectionProvider _collectionProvider;
+  PreferencesProvider _preferencesProvider;
 
   @override
   void initState() {
@@ -36,7 +40,6 @@ class _CollectionListState extends State<CollectionList> {
         _fetchMoreData();
       }
     });
-
 
     super.initState();
   }
@@ -49,11 +52,15 @@ class _CollectionListState extends State<CollectionList> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildListView(models, _scrollController);
+    _collectionProvider =
+        Provider.of<CollectionProvider>(context, listen: false);
+    _preferencesProvider =
+        Provider.of<PreferencesProvider>(context, listen: false);
+
+    return _buildListView(_scrollController);
   }
 
-  Widget _buildListView(
-      List<CollectionModel> models, ScrollController scrollController) {
+  Widget _buildListView(ScrollController scrollController) {
     return Container(
         child: ListView.builder(
             scrollDirection:
@@ -62,49 +69,15 @@ class _CollectionListState extends State<CollectionList> {
             itemCount: models.length + 1,
             itemBuilder: (context, int index) {
               if (index == models.length) {
-                return SpinKitThreeBounce(
-                  color: Colors.purple,
-                  size: 30.0,
-                );
+                return Center(child: CircularProgressIndicator());
               } else {
-                return CollectionCard(models[index],widget.userCollection);
+                return CollectionCard(models[index], widget.userCollection);
               }
             }));
   }
 
   void _fetchMoreData() async {
-    if (!isPerformingRequest) {
-      setState(() {
-        isPerformingRequest = true;
-        currentPage++;
-      });
-
-      List<CollectionModel> newModels ;
-      if(!widget.isWallpaper){
-       newModels =
-        await _photoRepo.fetchCollections(currentPage);
-      }else{
-        newModels =
-        await _photoRepo.searchCollections(currentPage);
-      }
-
-      // check if return data is empty
-      if (newModels.isEmpty) {
-        double edge = 30.0;
-        double offSetFromBottom = _scrollController.position.maxScrollExtent -
-            _scrollController.position.pixels;
-        if (offSetFromBottom < edge) {
-          _scrollController.animateTo(
-              _scrollController.offset - (edge - offSetFromBottom),
-              duration: Duration(microseconds: 1000),
-              curve: Curves.easeOut);
-        }
-      }
-
-      setState(() {
-        models.addAll(newModels);
-        isPerformingRequest = false;
-      });
-    }
+    models = await _collectionProvider
+        .fetchMoreData(_preferencesProvider.collectionType);
   }
 }

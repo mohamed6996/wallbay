@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:provider/provider.dart';
+import 'package:wallbay/bloc/user_details_provider.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/widgets/image_list.dart';
@@ -13,13 +15,31 @@ class PhotoUserProfile extends StatefulWidget {
   _PhotoUserProfileState createState() => _PhotoUserProfileState();
 }
 
-class _PhotoUserProfileState extends State<PhotoUserProfile> {
+  
+
+class _PhotoUserProfileState extends State<PhotoUserProfile>  with AutomaticKeepAliveClientMixin{
+
+Future _future;
+
+@override
+  void initState() {
+    super.initState();
+    print('called');
+    final UserDetailsProvider userDetailsProvider =
+        Provider.of<UserDetailsProvider>(context, listen: false);
+    _future =  userDetailsProvider.fetchData(widget.model.username);
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
-        appBar: AppBar(title: Text('${widget.model.name}'),),
+        appBar: AppBar(
+          title: Text('${widget.model.name}'),
+        ),
         body: FutureBuilder(
-            future: _fetchData(),
+            future: _future,
             builder: (context, snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
@@ -32,22 +52,18 @@ class _PhotoUserProfileState extends State<PhotoUserProfile> {
                   if (snapshot.hasError) {
                     return Center(child: Text("Error: ${snapshot.error}"));
                   } else {
-                    return ImageList(
-                      models: snapshot.data,
-                      isFavoriteTab: false,
-                      isPhotoUserProfile: true,
-                      userName: widget.model.username,
+                    return Consumer<UserDetailsProvider>(
+                      builder: (context, provider, child) => ImageList(
+                        models: provider.photoModelList,
+                        isPhotoUserProfile: true,
+                      ),
                     );
                   }
               }
             }));
-
-
   }
 
-  _fetchData() async {
-    return repository.fetchUsersPhotos(widget.model.username,1);
-  }
+  @override
+  bool get wantKeepAlive => true;
+
 }
-
-

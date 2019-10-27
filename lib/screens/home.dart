@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wallbay/bloc/main_provider.dart';
+import 'package:wallbay/bloc/pref_provider.dart';
 import 'package:wallbay/constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:wallbay/nav_bar_tabs/favorites_tab.dart';
@@ -19,10 +20,10 @@ import 'package:wallbay/utils/colors.dart';
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final PreferencesProvider mainProvider =
+    final PreferencesProvider preferencesProvider =
         Provider.of<PreferencesProvider>(context);
     return FutureBuilder(
-        future: mainProvider.initSharedPrefs(),
+        future: preferencesProvider.initSharedPrefs(),
         builder: (context, AsyncSnapshot<SharedPreferences> snapshot) {
           if (!snapshot.hasData) return Container();
           return MainTabs(snapshot.data);
@@ -76,8 +77,6 @@ class _MainTabsState extends State<MainTabs> {
         child: currentPage,
         bucket: bucket,
       ),
-
-
       bottomNavigationBar: BottomNavyBar(
         showElevation: true,
         selectedIndex: currentTab,

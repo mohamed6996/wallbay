@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wallbay/bloc/coll_photos_provider.dart';
+import 'package:wallbay/bloc/favorite_provider.dart';
 import 'package:wallbay/bloc/main_provider.dart';
+import 'package:wallbay/bloc/pref_provider.dart';
+import 'package:wallbay/bloc/search_provider.dart';
+import 'package:wallbay/bloc/user_details_provider.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/screens/photo_details_screen.dart';
-import 'package:wallbay/utils/shared_prefs.dart';
 import 'package:wallbay/widgets/image_card.dart';
 
 class ImageList extends StatefulWidget {
@@ -16,21 +19,15 @@ class ImageList extends StatefulWidget {
   final bool isCollectionPhotos;
   final bool isSearch;
   final bool isPhotoUserProfile;
-  final String query;
-  final int collectionId;
-  final String userName;
 
-  ImageList(
-      {Key key,
-      this.models,
-      this.isFavoriteTab,
-      this.isCollectionPhotos = false,
-      this.isSearch = false,
-      this.isPhotoUserProfile = false,
-      this.query = '',
-      this.collectionId = 0,
-      this.userName})
-      : super(key: key);
+  ImageList({
+    Key key,
+    this.models,
+    this.isFavoriteTab = false,
+    this.isCollectionPhotos = false,
+    this.isSearch = false,
+    this.isPhotoUserProfile = false,
+  }) : super(key: key);
 
   @override
   _ImageListState createState() => _ImageListState();
@@ -38,11 +35,15 @@ class ImageList extends StatefulWidget {
 
 class _ImageListState extends State<ImageList> {
   List<PhotoModel> models;
-  PhotoRepository _photoRepo;
 
   ScrollController _scrollController = new ScrollController();
   bool isPerformingRequest = false;
-  int currentPage = 1;
+  PreferencesProvider preferencesProvider;
+  MainProvider mainProvider;
+  FavoriteProvider _favoriteProvider;
+  CollPhotosProvider _collPhotosProvider;
+  SearchProvider _searchProvider;
+  UserDetailsProvider _userDetailsProvider;
 
   @override
   void initState() {
@@ -64,39 +65,50 @@ class _ImageListState extends State<ImageList> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    preferencesProvider =
+        Provider.of<PreferencesProvider>(context, listen: false);
+    mainProvider = Provider.of<MainProvider>(context, listen: false);
+    _favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
+    _collPhotosProvider =
+        Provider.of<CollPhotosProvider>(context, listen: false);
+    _searchProvider = Provider.of<SearchProvider>(context, listen: false);
+    _userDetailsProvider =
+        Provider.of<UserDetailsProvider>(context, listen: false);
+  }
+
+  @override
   Widget build(BuildContext context) {
-     final PreferencesProvider mainProvider = Provider.of<PreferencesProvider>(context);
-    int layout = mainProvider.layoutType;
+    int layout = preferencesProvider.layoutType;
 
     if (layout == 0)
-      return _buildListView(models, _scrollController);
+      return _buildListView(_scrollController);
     else if (layout == 1)
       return _buildGridView(models, _scrollController);
     else
-      return _buildStaggeredGridView(models, _scrollController);
+      return _buildStaggeredGridView(_scrollController);
   }
 
-  Widget _buildListView(
-      List<PhotoModel> models, ScrollController scrollController) {
-    return Container(
-        child: ListView.builder(
-            key: PageStorageKey("listKey"),
-            controller: scrollController,
-            itemCount: models.length + 1,
-            itemBuilder: (context, int index) {
-              if (index == models.length) {
-                return SpinKitThreeBounce(
-                  color: Colors.purple,
-                  size: 30.0,
-                );
-              } else {
-                return GestureDetector(
-                    onTap: () {
-                      onImagePressed(models[index]);
-                    },
-                    child: ImageCard(models[index]));
-              }
-            }));
+  Widget _buildListView(ScrollController scrollController) {
+    return ListView.builder(
+        key: PageStorageKey("listKey"),
+        controller: scrollController,
+        itemCount: models.length + 1,
+        itemBuilder: (context, int index) {
+          if (index == models.length) {
+            return SpinKitThreeBounce(
+              color: Colors.greenAccent,
+              size: 30.0,
+            );
+          } else {
+            return GestureDetector(
+                onTap: () {
+                  onImagePressed(models[index]);
+                },
+                child: ImageCard(models[index]));
+          }
+        });
   }
 
   Widget _buildGridView(
@@ -128,10 +140,9 @@ class _ImageListState extends State<ImageList> {
     );
   }
 
-  Widget _buildStaggeredGridView(
-      List<PhotoModel> models, ScrollController scrollController) {
+  Widget _buildStaggeredGridView(ScrollController scrollController) {
     return StaggeredGridView.countBuilder(
-      key: PageStorageKey("gridKey"),
+      key: PageStorageKey("staggeredKey"),
       controller: scrollController,
       crossAxisCount: 4,
       itemCount: models.length + 1,
@@ -160,51 +171,37 @@ class _ImageListState extends State<ImageList> {
   }
 
   void _fetchMoreData() async {
-    if (!isPerformingRequest) {
-      setState(() {
-        isPerformingRequest = true;
-        currentPage++;
-      });
-      List<PhotoModel> newModels;
-      if (widget.isFavoriteTab) {
-        newModels =
-            await _photoRepo.fetchFavoritePhotos(currentPage, widget.userName);
-      } else if (widget.isCollectionPhotos) {
-        newModels = await _photoRepo.fetchCollectionPhotos(
-            currentPage, widget.collectionId);
-      } else if (widget.isSearch) {
-        newModels = await _photoRepo.searchPhotos(currentPage, widget.query);
-      } else if (widget.isPhotoUserProfile) {
-        newModels =
-            await _photoRepo.fetchUsersPhotos(widget.userName, currentPage);
-      } else {
-        newModels = await _photoRepo.fetchPhotos(currentPage);
-      }
-      // check if return data is empty
-      if (newModels.isEmpty) {
-        double edge = 40;
-        double offSetFromBottom = _scrollController.position.maxScrollExtent -
-            _scrollController.position.pixels;
-        if (offSetFromBottom < edge) {
-          _scrollController.animateTo(
-              _scrollController.offset - (edge - offSetFromBottom),
-              duration: Duration(microseconds: 1000),
-              curve: Curves.easeOut);
-        }
-      }
-
-      setState(() {
-        models.addAll(newModels);
-        isPerformingRequest = false;
-      });
+    if (widget.isFavoriteTab) {
+      models = await _favoriteProvider.fetchMoreData();
+    } else if (widget.isCollectionPhotos) {
+      models = await _collPhotosProvider.fetchMoreData();
+    } else if (widget.isSearch) {
+      models = await _searchProvider.fetchMoreData();
+    } else if (widget.isPhotoUserProfile) {
+      models = await _userDetailsProvider.fetchMoreData();
+    } else {
+      models = await mainProvider.fetchMoreData();
     }
+
+    //todo
+    // check if return data is empty
+    // if (newModels.isEmpty) {
+    //   double edge = 40;
+    //   double offSetFromBottom = _scrollController.position.maxScrollExtent -
+    //       _scrollController.position.pixels;
+    //   if (offSetFromBottom < edge) {
+    //     _scrollController.animateTo(
+    //         _scrollController.offset - (edge - offSetFromBottom),
+    //         duration: Duration(microseconds: 1000),
+    //         curve: Curves.easeOut);
+    //   }
+    // }
   }
 
   onImagePressed(PhotoModel model) {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => PhotoDetailsScreen(
-                model, model.photoId)));
+            builder: (context) => PhotoDetailsScreen(model, model.photoId)));
   }
 }
