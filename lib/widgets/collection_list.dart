@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:wallbay/bloc/collection_provider.dart';
 import 'package:wallbay/bloc/pref_provider.dart';
 import 'package:wallbay/model/collection_model.dart';
-import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/widgets/collection_card.dart';
 
 class CollectionList extends StatefulWidget {
@@ -69,7 +68,10 @@ class _CollectionListState extends State<CollectionList> {
             itemCount: models.length + 1,
             itemBuilder: (context, int index) {
               if (index == models.length) {
-                return Center(child: CircularProgressIndicator());
+                return SpinKitThreeBounce(
+                  color: Colors.greenAccent,
+                  size: 30.0,
+                );
               } else {
                 return CollectionCard(models[index], widget.userCollection);
               }

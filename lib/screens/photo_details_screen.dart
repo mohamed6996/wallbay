@@ -9,7 +9,6 @@ import 'package:wallbay/bloc/pref_provider.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/screens/photo_user_profile.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:image_downloader/image_downloader.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view.dart';
@@ -30,10 +29,10 @@ class PhotoDetailsScreen extends StatefulWidget {
 class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   var childButtons = List<UnicornButton>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool isFabVisible = true, isSheetVisible = false;
 
   FavoriteProvider _favoriteProvider;
   MainProvider _mainProvider;
+  PreferencesProvider preferencesProvider;
 
   downloadImage(bool isWallpaper) async {
     try {
@@ -58,23 +57,27 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   }
 
   onFavoritePressed() async {
-    String photoId = widget.model.photoId;
-
-    if (!widget.model.liked_by_user) {
-      repository.likePhoto(photoId).then((_) {
-        setState(() {
-          _favoriteProvider.addFavorite(widget.model);
-          widget.model.liked_by_user = true;
-        });
-      });
+    if (!preferencesProvider.isLogedIn) {
+      _loginModalSheet();
+      return;
     } else {
-      repository.unlikePhoto(photoId).then((_) {
-        setState(() {
-          _favoriteProvider.removeFavorite(widget.model);
-          _mainProvider.removeFavorite(widget.model);
-          widget.model.liked_by_user = false;
+      String photoId = widget.model.photoId;
+      if (!widget.model.liked_by_user) {
+        repository.likePhoto(photoId).then((_) {
+          setState(() {
+            _favoriteProvider.addFavorite(widget.model);
+            widget.model.liked_by_user = true;
+          });
         });
-      });
+      } else {
+        repository.unlikePhoto(photoId).then((_) {
+          setState(() {
+            _favoriteProvider.removeFavorite(widget.model);
+            _mainProvider.removeFavorite(widget.model);
+            widget.model.liked_by_user = false;
+          });
+        });
+      }
     }
   }
 
@@ -82,6 +85,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   Widget build(BuildContext context) {
     _favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
     _mainProvider = Provider.of<MainProvider>(context, listen: false);
+    preferencesProvider =
+        Provider.of<PreferencesProvider>(context, listen: false);
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.black,
@@ -137,12 +142,10 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                   IconButton(
                       padding: EdgeInsets.all(0),
                       icon: Icon(Icons.file_download, color: Colors.white),
-                      onPressed: () {}),
+                      onPressed: () => downloadImage(false)),
                   IconButton(
-                      icon: Icon(Icons.info_outline, color: Colors.white),
-                      onPressed: () {
-                        _showModalSheet();
-                      }),
+                      icon: Icon(Icons.wallpaper, color: Colors.white),
+                      onPressed: () => downloadImage(true)),
                   IconButton(
                       icon: widget.model.liked_by_user
                           ? Icon(Icons.favorite, color: Colors.red)
@@ -189,16 +192,12 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                         Text(
                           widget.model.name,
                           style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold),
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         Padding(padding: EdgeInsets.all(2)),
                         Text('Unsplash.com',
                             style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 11,
-                                fontWeight: FontWeight.normal))
+                                fontSize: 11, fontWeight: FontWeight.normal))
                       ],
                     ),
                   ],
@@ -206,16 +205,20 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                 Padding(padding: EdgeInsets.all(8)),
                 Text(
                   '${widget.model.bio == null ? "" : widget.model.bio}',
-                  textAlign: TextAlign.center,
+                  //   textAlign: TextAlign.center,
                 ),
+                Padding(padding: EdgeInsets.all(12)),
                 FlatButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) =>
-                              PhotoUserProfile(widget.model)));
-                    },
-                    child: Text('More Photos'))
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => PhotoUserProfile(widget.model)));
+                  },
+                  child: Text('More Photos'),
+                  color: Colors.green,
+                  textColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 50),
+                )
               ],
             ),
           );
@@ -242,9 +245,12 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                   Center(
                       child: FlatButton(
                     padding: EdgeInsets.symmetric(horizontal: 50),
-                    onPressed: _launchURL,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _launchURL();
+                    },
                     child: Text('Sign up or log in'),
-                    color: Colors.orange,
+                    color: Colors.green,
                     textColor: Colors.white,
                   ))
                 ],
@@ -259,48 +265,5 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
     } else {
       throw 'Could not launch $loginUrl';
     }
-  }
-
-  void _showBottomSheet() {
-    setState(() {
-      isFabVisible = false;
-    });
-    _scaffoldKey.currentState
-        .showBottomSheet((context) {
-          return DraggableScrollableSheet(
-              expand: false,
-//          initialChildSize: 0.5,
-//          maxChildSize: 1,
-//          minChildSize: 0.25,
-              builder:
-                  (BuildContext context, ScrollController scrollController) {
-                print('called');
-
-                //return w;
-
-//                return Container(
-//                  child: PhotoUserProfile(widget.model, widget.photoRepository,
-//                      widget.sharedPreferences),
-//                );
-                return Container(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    itemCount: 25,
-                    padding: EdgeInsets.all(0.0),
-                    itemBuilder: (BuildContext context, int index) {
-                      return ListTile(title: Text('Item $index'));
-                    },
-                  ),
-                );
-              });
-        })
-        .closed
-        .whenComplete(() {
-          if (mounted) {
-            setState(() {
-              isFabVisible = true;
-            });
-          }
-        });
   }
 }

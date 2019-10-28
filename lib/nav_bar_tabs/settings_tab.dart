@@ -84,6 +84,10 @@ class _SettingsTabState extends State<SettingsTab> {
                           'Tell me what do you think and help me to improve the app.'),
                       onTap: () {},
                     ),
+                      ListTile(
+                      title: Text('Logout'),
+                      onTap: ()=>preferencesProvider.isLogedIn = false,
+                    ),
                   ],
                 ),
               ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:wallbay/bloc/coll_photos_provider.dart';
 import 'package:wallbay/model/photo_model.dart';
@@ -15,22 +14,29 @@ class CollectionPhotos extends StatefulWidget {
   _CollectionPhotosState createState() => _CollectionPhotosState();
 }
 
-class _CollectionPhotosState extends State<CollectionPhotos> {
+class _CollectionPhotosState extends State<CollectionPhotos>
+    with AutomaticKeepAliveClientMixin {
+  Future<List<PhotoModel>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    final CollPhotosProvider _collPhotosProvider =
+        Provider.of<CollPhotosProvider>(context, listen: false);
+    _future = _collPhotosProvider.fetchData(widget.id);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final CollPhotosProvider collPhotosProvider =
-        Provider.of<CollPhotosProvider>(context,listen: false);
+    super.build(context);
     return Scaffold(
         appBar: AppBar(title: Text(widget.title)),
         body: FutureBuilder(
-            future: collPhotosProvider.fetchData(widget.id),
+            future: _future,
             builder: (context, AsyncSnapshot<List<PhotoModel>> snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return Center(
-                      child: SpinKitHourGlass(
-                    color: Colors.deepOrange,
-                  ));
+                  return Center(child: CircularProgressIndicator());
                   break;
                 default:
                   if (snapshot.hasError) {
@@ -48,5 +54,6 @@ class _CollectionPhotosState extends State<CollectionPhotos> {
             }));
   }
 
-
+  @override
+  bool get wantKeepAlive => true;
 }

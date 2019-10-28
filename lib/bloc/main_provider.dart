@@ -48,11 +48,15 @@ class MainProvider extends ChangeNotifier {
       incrementPage();
     }
 
-    _morePhotoModelList = await repository.fetchPhotos(_currentPage);
+  //  _morePhotoModelList = await repository.fetchPhotos(_currentPage);
+
     //todo check if not empty
-    if (_morePhotoModelList.isNotEmpty) {
-      _photoModelList.addAll(_morePhotoModelList);
-    }
+    // if (_morePhotoModelList.isNotEmpty) {
+    //   _photoModelList.addAll(_morePhotoModelList);
+    // }
+
+    await Future.delayed(Duration(seconds: 2));
+
     _isFetchingMore = false;
     notifyListeners();
 

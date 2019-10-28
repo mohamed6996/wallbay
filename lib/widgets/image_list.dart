@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -9,7 +10,6 @@ import 'package:wallbay/bloc/pref_provider.dart';
 import 'package:wallbay/bloc/search_provider.dart';
 import 'package:wallbay/bloc/user_details_provider.dart';
 import 'package:wallbay/model/photo_model.dart';
-import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/screens/photo_details_screen.dart';
 import 'package:wallbay/widgets/image_card.dart';
 
@@ -35,6 +35,8 @@ class ImageList extends StatefulWidget {
 
 class _ImageListState extends State<ImageList> {
   List<PhotoModel> models;
+  int _oldModelLength = 0;
+  int layout;
 
   ScrollController _scrollController = new ScrollController();
   bool isPerformingRequest = false;
@@ -48,6 +50,7 @@ class _ImageListState extends State<ImageList> {
   @override
   void initState() {
     this.models = widget.models;
+    this._oldModelLength = widget.models.length;
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
@@ -80,20 +83,19 @@ class _ImageListState extends State<ImageList> {
 
   @override
   Widget build(BuildContext context) {
-    int layout = preferencesProvider.layoutType;
-
+    layout = preferencesProvider.layoutType;
     if (layout == 0)
-      return _buildListView(_scrollController);
+      return _buildListView();
     else if (layout == 1)
-      return _buildGridView(models, _scrollController);
+      return _buildGridView();
     else
-      return _buildStaggeredGridView(_scrollController);
+      return _buildStaggeredGridView();
   }
 
-  Widget _buildListView(ScrollController scrollController) {
+  Widget _buildListView() {
     return ListView.builder(
         key: PageStorageKey("listKey"),
-        controller: scrollController,
+        controller: _scrollController,
         itemCount: models.length + 1,
         itemBuilder: (context, int index) {
           if (index == models.length) {
@@ -111,17 +113,16 @@ class _ImageListState extends State<ImageList> {
         });
   }
 
-  Widget _buildGridView(
-      List<PhotoModel> models, ScrollController scrollController) {
+  Widget _buildGridView() {
     return StaggeredGridView.countBuilder(
       key: PageStorageKey("gridKey"),
-      controller: scrollController,
+      controller: _scrollController,
       crossAxisCount: 4,
       itemCount: models.length + 1,
       itemBuilder: (BuildContext context, int index) {
         if (index == models.length) {
           return SpinKitThreeBounce(
-            color: Colors.purple,
+            color: Colors.greenAccent,
             size: 30.0,
           );
         } else {
@@ -140,16 +141,16 @@ class _ImageListState extends State<ImageList> {
     );
   }
 
-  Widget _buildStaggeredGridView(ScrollController scrollController) {
+  Widget _buildStaggeredGridView() {
     return StaggeredGridView.countBuilder(
       key: PageStorageKey("staggeredKey"),
-      controller: scrollController,
+      controller: _scrollController,
       crossAxisCount: 4,
       itemCount: models.length + 1,
       itemBuilder: (BuildContext context, int index) {
         if (index == models.length) {
           return SpinKitThreeBounce(
-            color: Colors.purple,
+            color: Colors.greenAccent,
             size: 30.0,
           );
         } else {
@@ -183,19 +184,32 @@ class _ImageListState extends State<ImageList> {
       models = await mainProvider.fetchMoreData();
     }
 
-    //todo
-    // check if return data is empty
-    // if (newModels.isEmpty) {
-    //   double edge = 40;
-    //   double offSetFromBottom = _scrollController.position.maxScrollExtent -
-    //       _scrollController.position.pixels;
-    //   if (offSetFromBottom < edge) {
-    //     _scrollController.animateTo(
-    //         _scrollController.offset - (edge - offSetFromBottom),
-    //         duration: Duration(microseconds: 1000),
-    //         curve: Curves.easeOut);
-    //   }
-    // }
+    if (_oldModelLength != models.length) {
+      _oldModelLength = models.length;
+    } else {
+      // check if return data is empty
+
+      double edge = 0;
+      switch (layout) {
+        case 0:
+          edge = 30;
+          break;
+        case 1:
+          edge = 50;
+          break;
+        default:
+          edge = 40;
+      }
+
+      double offSetFromBottom = _scrollController.position.maxScrollExtent -
+          _scrollController.position.pixels;
+      if (offSetFromBottom < edge) {
+        _scrollController.animateTo(
+            _scrollController.offset - (edge - offSetFromBottom),
+            duration: Duration(milliseconds: 500),
+            curve: Curves.easeOut);
+      }
+    }
   }
 
   onImagePressed(PhotoModel model) {

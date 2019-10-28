@@ -26,16 +26,12 @@ class Home extends StatelessWidget {
         future: preferencesProvider.initSharedPrefs(),
         builder: (context, AsyncSnapshot<SharedPreferences> snapshot) {
           if (!snapshot.hasData) return Container();
-          return MainTabs(snapshot.data);
+          return MainTabs();
         });
   }
 }
 
 class MainTabs extends StatefulWidget {
-  final SharedPreferences preferences;
-
-  MainTabs(this.preferences);
-
   @override
   _MainTabsState createState() => _MainTabsState();
 }
@@ -55,6 +51,8 @@ class _MainTabsState extends State<MainTabs> {
   Widget currentPage;
   int currentTab = 0;
 
+  PreferencesProvider preferencesProvider;
+
   // StreamSubscription _sub;  //todo  init links
 
   @override
@@ -72,6 +70,7 @@ class _MainTabsState extends State<MainTabs> {
 
   @override
   Widget build(BuildContext context) {
+    preferencesProvider = Provider.of<PreferencesProvider>(context);
     return Scaffold(
       body: PageStorage(
         child: currentPage,
@@ -134,7 +133,6 @@ class _MainTabsState extends State<MainTabs> {
       if (uri != null) {
         setState(() {
           String code = uri.queryParameters["code"];
-          print("code:" + code);
           if (code != null) {
             _getAccessToken(Constants.clientId, Constants.clientSecret,
                 Constants.redirectURI, code, "authorization_code");
@@ -147,18 +145,16 @@ class _MainTabsState extends State<MainTabs> {
   }
 
   void _saveAccessTokenToPrefs(AccessToken body) async {
-    widget.preferences
-        .setString(Constants.OAUTH_ACCESS_TOKEN, body.access_token);
-    widget.preferences.setString(Constants.OAUTH_TOKEN_TYPE, body.token_type);
-    widget.preferences.setBool(Constants.OAUTH_LOGED_IN, true);
+    preferencesProvider.accessToken = body.access_token;
+    preferencesProvider.accessTokenType = body.token_type;
+    preferencesProvider.isLogedIn = true;
   }
 
   Future<void> _initTabs() async {
     mainFeedTab = MainFeedTab(keyMainFeed);
     collectionsTab = CollectionsTab(keyCollections);
-    favoritesTab = FavoritesTab(keyFavorites,
-        isLogedin:
-            widget.preferences.getBool(Constants.OAUTH_LOGED_IN) ?? false);
+    favoritesTab =
+        FavoritesTab(keyFavorites);
     settingsTab = SettingsTab();
 
     pages = [mainFeedTab, collectionsTab, favoritesTab, settingsTab];
