@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
+import 'package:wallbay/bloc/pref_provider.dart';
 import 'package:wallbay/model/photo_model.dart';
+
+String getLoadPhotoUrl(BuildContext context, PhotoModel model) {
+  PreferencesProvider provider =
+      Provider.of<PreferencesProvider>(context, listen: false);
+  String quality = provider.loadQuality.toLowerCase();
+  if (quality == 'regular')
+    return model.regular;
+  else
+    return model.small;
+}
 
 class ImageCard extends StatelessWidget {
   final PhotoModel photoModel;
@@ -8,7 +20,7 @@ class ImageCard extends StatelessWidget {
   ImageCard(this.photoModel);
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Card(
       child: Column(
         children: <Widget>[
@@ -18,7 +30,7 @@ class ImageCard extends StatelessWidget {
               tag: photoModel.photoId,
               child: CachedNetworkImage(
                 fit: BoxFit.cover,
-                imageUrl: photoModel.regularPhotoUrl,
+                imageUrl: getLoadPhotoUrl(context, photoModel),
                 errorWidget: (context, String s, o) {
                   return Icon(Icons.error);
                 },
@@ -47,7 +59,7 @@ class ImageCard extends StatelessWidget {
                     padding: EdgeInsets.all(5.0),
                     child: Row(
                       children: <Widget>[
-                        _circleImage(photoModel.mediumProfilePhotoUrl),
+                        _circleImage(photoModel.largeProfilePhotoUrl),
                         Padding(padding: EdgeInsets.only(left: 10.0)),
                         Text(
                           photoModel.name,
@@ -88,7 +100,7 @@ class StaggeredWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: CachedNetworkImage(
                 fit: BoxFit.cover,
-                imageUrl: photoModel.regularPhotoUrl,
+                imageUrl: getLoadPhotoUrl(context, photoModel),
                 errorWidget: (context, String s, o) {
                   return Icon(Icons.error);
                 },
@@ -133,7 +145,7 @@ class GridItemView extends StatelessWidget {
               tag: photoModel.photoId,
               child: CachedNetworkImage(
                 fit: BoxFit.cover,
-                imageUrl: photoModel.regularPhotoUrl,
+                imageUrl: getLoadPhotoUrl(context, photoModel),
                 errorWidget: (context, String s, o) {
                   return Icon(Icons.error);
                 },

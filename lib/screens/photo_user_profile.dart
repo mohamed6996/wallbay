@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wallbay/bloc/user_details_provider.dart';
 import 'package:wallbay/model/photo_model.dart';
-import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/widgets/image_list.dart';
+
 
 class PhotoUserProfile extends StatefulWidget {
   PhotoUserProfile(this.model);
@@ -15,21 +16,17 @@ class PhotoUserProfile extends StatefulWidget {
   _PhotoUserProfileState createState() => _PhotoUserProfileState();
 }
 
-  
+class _PhotoUserProfileState extends State<PhotoUserProfile>
+    with AutomaticKeepAliveClientMixin {
+  Future _future;
 
-class _PhotoUserProfileState extends State<PhotoUserProfile>  with AutomaticKeepAliveClientMixin{
-
-Future _future;
-
-@override
+  @override
   void initState() {
     super.initState();
-    print('called');
     final UserDetailsProvider userDetailsProvider =
         Provider.of<UserDetailsProvider>(context, listen: false);
-    _future =  userDetailsProvider.fetchData(widget.model.username);
+    _future = userDetailsProvider.fetchData(widget.model.username);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +34,16 @@ Future _future;
     return Scaffold(
         appBar: AppBar(
           title: Text('${widget.model.name}'),
+          actions: <Widget>[
+            FlatButton(
+              child: Icon(Icons.portrait),
+              onPressed: () {
+                String url =
+                    'https://unsplash.com/@${widget.model.username}?utm_source=WallBay&utm_medium=referral';
+                _launchURL(url);
+              },
+            )
+          ],
         ),
         body: FutureBuilder(
             future: _future,
@@ -66,4 +73,11 @@ Future _future;
   @override
   bool get wantKeepAlive => true;
 
+  _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 }

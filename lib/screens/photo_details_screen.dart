@@ -34,9 +34,21 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   MainProvider _mainProvider;
   PreferencesProvider preferencesProvider;
 
+  String _downlaodUrl() {
+    String quality = preferencesProvider.downloadQuality.toLowerCase();
+    if (quality == 'raw')
+      return widget.model.raw;
+    else if (quality == 'full')
+      return widget.model.full;
+    else if (quality == 'regular')
+      return widget.model.regular;
+    else
+      return widget.model.small;
+  }
+
   downloadImage(bool isWallpaper) async {
     try {
-      var url = widget.model.downloadPhotoUrl;
+      var url = _downlaodUrl();
 
       var imageId = await ImageDownloader.downloadImage(url,
           destination: AndroidDestinationType.directoryPictures
@@ -45,6 +57,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
       if (imageId == null) {
         return;
       }
+
+      await repository.reportDownload(widget.model.photoId);
 
       var path = await ImageDownloader.findPath(imageId);
 
@@ -96,8 +110,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
           heroTag: widget.model.photoId,
           initialScale: PhotoViewComputedScale.contained,
           minScale: PhotoViewComputedScale.contained,
-          imageProvider:
-              CachedNetworkImageProvider(widget.model.regularPhotoUrl),
+          imageProvider: CachedNetworkImageProvider(widget.model.regular),
         ),
       ),
       bottomNavigationBar: Container(
@@ -112,7 +125,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                 },
                 child: Row(
                   children: <Widget>[
-                    _circleImage(widget.model.mediumProfilePhotoUrl, 40),
+                    _circleImage(widget.model.largeProfilePhotoUrl, 40),
                     Padding(padding: EdgeInsets.only(left: 10.0)),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -183,7 +196,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
               children: <Widget>[
                 Row(
                   children: <Widget>[
-                    _circleImage(widget.model.mediumProfilePhotoUrl, 60),
+                    _circleImage(widget.model.largeProfilePhotoUrl, 60),
                     Padding(padding: EdgeInsets.only(left: 10.0)),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -259,7 +272,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   }
 
   _launchURL() async {
-    var loginUrl = Constants.loginUrl;
+    var loginUrl = constants.loginUrl;
     if (await canLaunch(loginUrl)) {
       await launch(loginUrl);
     } else {

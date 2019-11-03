@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wallbay/bloc/main_provider.dart';
 import 'package:wallbay/bloc/pref_provider.dart';
 import 'package:wallbay/constants.dart';
 import 'package:flutter/foundation.dart';
@@ -134,7 +133,7 @@ class _MainTabsState extends State<MainTabs> {
         setState(() {
           String code = uri.queryParameters["code"];
           if (code != null) {
-            _getAccessToken(Constants.clientId, Constants.clientSecret,
+            _getAccessToken(constants.clientId, constants.clientSecret,
                 Constants.redirectURI, code, "authorization_code");
           }
         });

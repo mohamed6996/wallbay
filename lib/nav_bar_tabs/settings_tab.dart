@@ -10,7 +10,8 @@ class SettingsTab extends StatefulWidget {
 class _SettingsTabState extends State<SettingsTab> {
   @override
   Widget build(BuildContext context) {
-    PreferencesProvider preferencesProvider = Provider.of<PreferencesProvider>(context,listen: false);
+    PreferencesProvider preferencesProvider =
+        Provider.of<PreferencesProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(title: Text('Settings')),
       body: SingleChildScrollView(
@@ -59,6 +60,50 @@ class _SettingsTabState extends State<SettingsTab> {
               Divider(),
               Padding(
                 padding: EdgeInsets.all(8.0),
+                child: Text('Quality'),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 8.0),
+                child: ListView(
+                  shrinkWrap: true,
+                  primary: false,
+                  children: <Widget>[
+                    ListTile(
+                      title: Text('Load'),
+                      subtitle:
+                          Text('Choose the images quality that are loaded.'),
+                      onTap: () async {
+                        await showDialog(
+                            context: context,
+                            builder: (context) {
+                              return PickQualityDialog(
+                                preferencesProvider,
+                                isLoadQuality: true,
+                              );
+                            });
+                      },
+                    ),
+                    ListTile(
+                      title: Text('Download'),
+                      subtitle: Text(
+                          'Choose the images quality that are downloaded.'),
+                      onTap: () async {
+                        await showDialog(
+                            context: context,
+                            builder: (context) {
+                              return PickQualityDialog(
+                                preferencesProvider,
+                                isLoadQuality: false,
+                              );
+                            });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Divider(),
+              Padding(
+                padding: EdgeInsets.all(8.0),
                 child: Text('About'),
               ),
               Padding(
@@ -84,9 +129,9 @@ class _SettingsTabState extends State<SettingsTab> {
                           'Tell me what do you think and help me to improve the app.'),
                       onTap: () {},
                     ),
-                      ListTile(
+                    ListTile(
                       title: Text('Logout'),
-                      onTap: ()=>preferencesProvider.isLogedIn = false,
+                      onTap: () => preferencesProvider.isLogedIn = false,
                     ),
                   ],
                 ),
@@ -221,6 +266,71 @@ class _CollectionTypeState extends State<CollectionType> {
                 });
               }),
         ],
+      ),
+    );
+  }
+}
+
+class PickQualityDialog extends StatefulWidget {
+  final PreferencesProvider mainProvider;
+  final bool isLoadQuality;
+  PickQualityDialog(this.mainProvider, {this.isLoadQuality});
+  @override
+  _PickQualityDialogState createState() => _PickQualityDialogState();
+}
+
+class _PickQualityDialogState extends State<PickQualityDialog> {
+  String _radioValue = 'Full';
+
+  PreferencesProvider _mainProvider;
+
+  _save(String quality) {
+    if (widget.isLoadQuality) {
+      _mainProvider.loadQuality = quality;
+    } else {
+      _mainProvider.downloadQuality = quality;
+    }
+  }
+
+  List<String> options=[];
+  List<String> downloadOptions = ['Raw', 'Full', 'Regular', 'Small'];
+  List<String> loadOptions = ['Regular', 'Small'];
+
+
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _mainProvider = widget.mainProvider;
+    _radioValue = widget.isLoadQuality == true
+        ? _mainProvider.loadQuality
+        : _mainProvider.downloadQuality;
+
+    options = widget.isLoadQuality ? loadOptions : downloadOptions;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Choose Quality'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: options.map((item) {
+          return RadioListTile(
+            title: Text(item),
+            value: item,
+            groupValue: _radioValue,
+            onChanged: (val) {
+              setState(() {
+                _radioValue = val;
+                _save(val);
+                Navigator.of(context).pop();
+              });
+            },
+          );
+        }).toList(),
       ),
     );
   }

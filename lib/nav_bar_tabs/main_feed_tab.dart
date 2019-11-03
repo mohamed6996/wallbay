@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallbay/bloc/main_provider.dart';
-import 'package:wallbay/bloc/pref_provider.dart';
 import 'package:wallbay/bloc/search_provider.dart';
 import 'package:wallbay/model/photo_model.dart';
-import 'package:wallbay/repository/photo_repository.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:wallbay/widgets/image_list.dart';
 

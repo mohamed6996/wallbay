@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "756272548718",
+    "firebase_url": "https://wallbay-3636a.firebaseio.com",
+    "project_id": "wallbay-3636a",
+    "storage_bucket": "wallbay-3636a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:756272548718:android:bbd46c0d4f9776e0010f7f",
+        "android_client_info": {
+          "package_name": "com.wallpaper.wallbay"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "756272548718-12cjseajdvdcrqes085o3e5robro9icl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCG8PZ0XveS-G0pvU9p9g3QaDA8VJFsqs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "756272548718-12cjseajdvdcrqes085o3e5robro9icl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

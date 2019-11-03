@@ -3,9 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:wallbay/bloc/collection_provider.dart';
 import 'package:wallbay/bloc/pref_provider.dart';
 import 'package:wallbay/model/collection_model.dart';
-import 'package:wallbay/repository/photo_repository.dart';
-import 'package:async/async.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:wallbay/widgets/collection_list.dart';
 
 typedef onCollectionSelected = void Function(String filter);

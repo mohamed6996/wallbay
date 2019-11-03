@@ -104,7 +104,7 @@ class FavoritesTab extends StatelessWidget {
   }
 
   _launchURL() async {
-    var loginUrl = Constants.loginUrl;
+    var loginUrl =constants.loginUrl;
     if (await canLaunch(loginUrl)) {
       await launch(loginUrl);
     } else {

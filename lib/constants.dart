@@ -1,24 +1,58 @@
-class Constants {
-  static final clientId =
-      'e35dcccb0b3f8139d54ab3871ea5513bd85c75b503a53ed215135656996a0d05'; // accessKey
-  static final clientSecret =
-      '17f2a578498caf1fa69f7921bb9d8f384e613321018143706e95687def825851'; // secretkey
-  static final String redirectURI = "wallbay://callback";
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 
-  static final loginUrl = "https://unsplash.com/oauth/authorize" +
+Constants constants = Constants.instance;
+
+class Constants {
+  static Constants instance;
+
+  Constants._();
+
+  static Future<Map<String, String>> create() async {
+    instance = Constants._();
+    final RemoteConfig remoteConfig = await RemoteConfig.instance;
+    await remoteConfig.fetch(expiration: const Duration(hours: 5));
+    await remoteConfig.activateFetched();
+
+    String clientId = remoteConfig.getString('clientId');
+    String clientSecret = remoteConfig.getString('clientSecret');
+
+    Map<String, String> map = Map();
+    map.addAll({"clientId": clientId, "clientSecret": clientSecret});
+
+    return map;
+  }
+
+  static final String redirectURI = "wallbay://callback";
+  String _clientId;
+  String _clientSecret;
+  String _loginUrl;
+
+  get clientId => _clientId;
+  get clientSecret => _clientSecret;
+  get loginUrl => _loginUrl;
+
+  set clientId(String val) {
+    this._clientId = val;
+  }
+
+  set clientSecret(String val) {
+    this._clientSecret = val;
+  }
+
+  set loginUrl(String clientId){
+    _loginUrl =  "https://unsplash.com/oauth/authorize" +
       "?client_id=" +
-      clientId +
+       clientId +
       "&redirect_uri=" +
       redirectURI +
       "&response_type=" +
       "code" +
       "&scope=" +
       "public+read_user+write_user+read_photos+write_photos+write_likes+read_collections+write_collections";
+  }
 
 
- static final BASE_URL = "https://api.unsplash.com/";
-
-
+  static final BASE_URL = "https://api.unsplash.com/";
 
   // Shared preferences
   static final OAUTH_LOGED_IN = "oauth.loggedin";

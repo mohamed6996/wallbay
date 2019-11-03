@@ -6,18 +6,24 @@ class PhotoModel {
   int width;
   int height;
   bool liked_by_user;
-  String regularPhotoUrl;
+  String raw;
+  String full;
+  String regular;
+  String small;
   String color;
 
-  //photo
+  //photo //don`t use for downloading
   String fullPhotoUrl;
-  String downloadPhotoUrl;
+  String downloadPhotoUrlRaw;
+  String downloadPhotoUrlFull;
+  String downloadPhotoUrlRegular;
+  String downloadPhotoUrlSmall;
 
   //user
   String userId;
   String username;
   String name;
-  String mediumProfilePhotoUrl;
+  String largeProfilePhotoUrl;
   String bio;
 
   PhotoModel(
@@ -26,14 +32,20 @@ class PhotoModel {
       this.width,
       this.height,
       this.liked_by_user,
-      this.regularPhotoUrl,
+      this.raw,
+      this.full,
+      this.regular,
+      this.small,
       this.fullPhotoUrl,
-      this.downloadPhotoUrl,
+      this.downloadPhotoUrlRaw,
+      this.downloadPhotoUrlFull,
+      this.downloadPhotoUrlRegular,
+      this.downloadPhotoUrlSmall,
       this.color,
       this.userId,
       this.username,
       this.name,
-      this.mediumProfilePhotoUrl,
+      this.largeProfilePhotoUrl,
       this.bio});
 
   PhotoModel.fromPhotoResponse(PhotoResponse response)
@@ -42,13 +54,16 @@ class PhotoModel {
         width = response.width,
         height = response.height,
         liked_by_user = response.liked_by_user,
-        regularPhotoUrl = response.urls.regular,
+        raw = response.urls.raw,
+        full = response.urls.full,
+        regular = response.urls.regular,
+        small = response.urls.small,
         fullPhotoUrl = response.urls.full,
-        downloadPhotoUrl = response.links.download,
+        downloadPhotoUrlRaw = response.links.download,
         color = response.color,
         userId = response.user.id,
         username = response.user.username,
         name = response.user.name,
-        mediumProfilePhotoUrl = response.user.profile_image.medium,
+        largeProfilePhotoUrl = response.user.profile_image.large,
         bio = response.user.bio;
 }

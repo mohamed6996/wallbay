@@ -14,26 +14,36 @@ class PreferencesProvider extends ChangeNotifier {
 
   int get collectionType => _sharedPreferences.getInt('collection') ?? 0;
 
-  bool get isLogedIn => _sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false;
+  bool get isLogedIn =>
+      _sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false;
 
-  set isLogedIn(bool islogedin){
+  String get loadQuality => _sharedPreferences.getString('loadQuality') ?? 'Regular';
+  String get downloadQuality => _sharedPreferences.getString('downloadQuality')?? 'Full';
+
+  set isLogedIn(bool islogedin) {
     _sharedPreferences.setBool(Constants.OAUTH_LOGED_IN, islogedin);
-     notifyListeners();
+    notifyListeners();
   }
 
-  set accessToken(String token){
-    _sharedPreferences.setString(Constants.OAUTH_ACCESS_TOKEN,token);
+  set accessToken(String token) {
+    _sharedPreferences.setString(Constants.OAUTH_ACCESS_TOKEN, token);
   }
 
-  set accessTokenType(String tokenType){
-    _sharedPreferences.setString(Constants.OAUTH_TOKEN_TYPE,tokenType);
+  set accessTokenType(String tokenType) {
+    _sharedPreferences.setString(Constants.OAUTH_TOKEN_TYPE, tokenType);
   }
-
- // void logout()=> _sharedPreferences.setBool(Constants.OAUTH_LOGED_IN, false);
 
   set collectionType(int type) {
     _sharedPreferences.setInt('collection', type);
     notifyListeners();
+  }
+
+  set loadQuality(String quality) {
+    _sharedPreferences.setString('loadQuality', quality);
+  }
+
+  set downloadQuality(String quality) {
+    _sharedPreferences.setString('downloadQuality', quality);
   }
 
   Future<SharedPreferences> initSharedPrefs() async {

@@ -18,15 +18,18 @@ PhotoRepository repository = PhotoRepository.instance;
 
 class PhotoRepository extends Repository {
   static SharedPreferences _sharedPreferences;
-  static Dio dio;
+  static Dio _dio;
   static PhotoRepository instance;
+  String _clintId = constants.clientId;
+  final int _perPage = 20;
+
 
   PhotoRepository._();
 
   static Future<PhotoRepository> create() async {
     PhotoRepository repository = PhotoRepository._();
     _sharedPreferences = await SharedPreferences.getInstance();
-    dio = new Dio();
+    _dio = new Dio();
     instance = repository;
     return repository;
   }
@@ -43,17 +46,17 @@ class PhotoRepository extends Repository {
 
     if (_sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false) {
       // https://api.unsplash.com/photos with Authorization: Bearer ACCESS_TOKEN
-      photosUrl = Constants.BASE_URL + "photos/?page=$pageNumber";
+      photosUrl = Constants.BASE_URL + "photos/?page=$pageNumber&per_page=$_perPage";
       Options options = new Options();
       options.headers = map;
 
-      var response = await dio.get(photosUrl, options: options);
+      var response = await _dio.get(photosUrl, options: options);
       list = PhotoResponseList.fromJson(response.data);
     } else {
       photosUrl = Constants.BASE_URL +
           "photos/" +
-          "?client_id=${Constants.clientId}&page=$pageNumber";
-      var response = await dio.get(photosUrl);
+          "?client_id=$_clintId&page=$pageNumber&per_page=$_perPage";
+      var response = await _dio.get(photosUrl);
       list = PhotoResponseList.fromJson(response.data);
     }
 
@@ -75,20 +78,19 @@ class PhotoRepository extends Repository {
     PhotoResponseList list;
 
     if (_sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false) {
-    
       // https://api.unsplash.com/photos with Authorization: Bearer ACCESS_TOKEN
       photosUrl =
-          Constants.BASE_URL + "users/$userName/photos/?page=$pageNumber";
+          Constants.BASE_URL + "users/$userName/photos/?page=$pageNumber&per_page=$_perPage";
       Options options = new Options();
       options.headers = map;
 
-      var response = await dio.get(photosUrl, options: options);
+      var response = await _dio.get(photosUrl, options: options);
       list = PhotoResponseList.fromJson(response.data);
     } else {
       photosUrl = Constants.BASE_URL +
           "users/$userName/photos/" +
-          "?client_id=${Constants.clientId}&page=$pageNumber";
-      var response = await dio.get(photosUrl);
+          "?client_id=$_clintId&page=$pageNumber&per_page=$_perPage";
+      var response = await _dio.get(photosUrl);
       list = PhotoResponseList.fromJson(response.data);
     }
 
@@ -110,17 +112,17 @@ class PhotoRepository extends Repository {
 
     if (_sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false) {
       photosUrl =
-          Constants.BASE_URL + "search/photos/?page=$pageNumber&query=$query";
+          Constants.BASE_URL + "search/photos/?page=$pageNumber&per_page=$_perPage&query=$query";
       Options options = new Options();
       options.headers = map;
 
-      var response = await dio.get(photosUrl, options: options);
+      var response = await _dio.get(photosUrl, options: options);
       list = PhotoSearchResponse.fromJson(response.data);
     } else {
       photosUrl = Constants.BASE_URL +
           "search/photos/" +
-          "?client_id=${Constants.clientId}&page=$pageNumber&query=$query";
-      var response = await dio.get(photosUrl);
+          "?client_id=$_clintId&page=$pageNumber&per_page=$_perPage&query=$query";
+      var response = await _dio.get(photosUrl);
       list = PhotoSearchResponse.fromJson(response.data);
     }
 
@@ -142,11 +144,11 @@ class PhotoRepository extends Repository {
 
     PhotoResponseList list;
 
-    photosUrl = Constants.BASE_URL + "users/$userName/likes/?page=$pageNumber";
+    photosUrl = Constants.BASE_URL + "users/$userName/likes/?page=$pageNumber&per_page=$_perPage";
     Options options = new Options();
     options.headers = map;
 
-    var response = await dio.get(photosUrl, options: options);
+    var response = await _dio.get(photosUrl, options: options);
     list = PhotoResponseList.fromJson(response.data);
 
     List<PhotoModel> models = list.responseList
@@ -154,6 +156,13 @@ class PhotoRepository extends Repository {
         .toList();
 
     return models;
+  }
+
+  reportDownload(String photoId) async {
+    String url = Constants.BASE_URL +
+        "photos/$photoId/download" +
+        "?client_id=$_clintId";
+    var response = await _dio.get(url);
   }
 
   Future<MeModel> getMe() async {
@@ -166,7 +175,7 @@ class PhotoRepository extends Repository {
     Options options = new Options();
     options.headers = map;
 
-    var response = await dio.get(meUrl, options: options);
+    var response = await _dio.get(meUrl, options: options);
 
     var meRes = MeResponse.fromJson(response.data);
 
@@ -189,7 +198,7 @@ class PhotoRepository extends Repository {
     Options options = new Options();
     options.headers = map;
 
-    var response = await dio.post(likeUrl, options: options);
+    var response = await _dio.post(likeUrl, options: options);
 
     return null;
   }
@@ -205,7 +214,7 @@ class PhotoRepository extends Repository {
     Options options = new Options();
     options.headers = map;
 
-    var response = await dio.delete(unlikeUrl, options: options);
+    var response = await _dio.delete(unlikeUrl, options: options);
 
     return null;
   }
@@ -213,9 +222,9 @@ class PhotoRepository extends Repository {
   @override
   Future<List<CollectionModel>> fetchCollections(int pageNumber) async {
     String collectionsUrl = Constants.BASE_URL +
-        "collections/?client_id=${Constants.clientId}&page=$pageNumber";
+        "collections/?client_id=$_clintId&page=$pageNumber&per_page=$_perPage";
 
-    var response = await dio.get(collectionsUrl);
+    var response = await _dio.get(collectionsUrl);
     CollectionResponseList list =
         CollectionResponseList.fromJson(response.data);
 
@@ -230,9 +239,9 @@ class PhotoRepository extends Repository {
   Future<List<CollectionModel>> searchCollections(int pageNumber,
       {String query = "wallpaper"}) async {
     String collectionsUrl = Constants.BASE_URL +
-        "search/collections/?client_id=${Constants.clientId}&page=$pageNumber&query=$query";
+        "search/collections/?client_id=$_clintId&page=$pageNumber&per_page=$_perPage&query=$query";
 
-    var response = await dio.get(collectionsUrl);
+    var response = await _dio.get(collectionsUrl);
 
     CollectionSearchResponse list;
 
@@ -251,9 +260,9 @@ class PhotoRepository extends Repository {
     PhotoResponseList list;
 
     String collectionsUrl = Constants.BASE_URL +
-        "collections/$collectionId/photos/?client_id=${Constants.clientId}&page=$pageNumber";
+        "collections/$collectionId/photos/?client_id=$_clintId&page=$pageNumber&per_page=$_perPage";
 
-    var response = await dio.get(collectionsUrl);
+    var response = await _dio.get(collectionsUrl);
     list = PhotoResponseList.fromJson(response.data);
 
     List<PhotoModel> models = list.responseList
@@ -267,9 +276,9 @@ class PhotoRepository extends Repository {
   Future<List<CollectionModel>> fetchUserCollections(
       int pageNumber, String userName) async {
     String collectionsUrl = Constants.BASE_URL +
-        "users/$userName/collections/?client_id=${Constants.clientId}&page=$pageNumber";
+        "users/$userName/collections/?client_id=$_clintId&page=$pageNumber&per_page=$_perPage";
 
-    var response = await dio.get(collectionsUrl);
+    var response = await _dio.get(collectionsUrl);
     CollectionResponseList list =
         CollectionResponseList.fromJson(response.data);
 
@@ -285,9 +294,9 @@ class PhotoRepository extends Repository {
   Future<List<PhotoModel>> fetchUserPhotos(
       int pageNumber, String userName) async {
     String userPhotosUrl = Constants.BASE_URL +
-        "users/$userName/photos/?client_id=${Constants.clientId}&page=$pageNumber";
+        "users/$userName/photos/?client_id=$_clintId&page=$pageNumber&per_page=$_perPage";
 
-    var response = await dio.get(userPhotosUrl);
+    var response = await _dio.get(userPhotosUrl);
 
     var list = PhotoResponseList.fromJson(response.data);
 
@@ -301,9 +310,9 @@ class PhotoRepository extends Repository {
   @override
   Future<PhotoDetailsModel> fetchPhotoDetails(String id) async {
     String userPhotosUrl =
-        Constants.BASE_URL + "photos/$id/?client_id=${Constants.clientId}";
+        Constants.BASE_URL + "photos/$id/?client_id=$_clintId";
 
-    var response = await dio.get(userPhotosUrl);
+    var response = await _dio.get(userPhotosUrl);
 
     var res = PhotoDetails.fromJson(response.data);
 
