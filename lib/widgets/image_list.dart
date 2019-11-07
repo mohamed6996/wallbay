@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -100,7 +99,7 @@ class _ImageListState extends State<ImageList> {
         itemBuilder: (context, int index) {
           if (index == models.length) {
             return SpinKitThreeBounce(
-              color: Colors.greenAccent,
+              color: Theme.of(context).accentColor,
               size: 30.0,
             );
           } else {
@@ -122,7 +121,7 @@ class _ImageListState extends State<ImageList> {
       itemBuilder: (BuildContext context, int index) {
         if (index == models.length) {
           return SpinKitThreeBounce(
-            color: Colors.greenAccent,
+            color: Theme.of(context).accentColor,
             size: 30.0,
           );
         } else {
@@ -150,14 +149,12 @@ class _ImageListState extends State<ImageList> {
       itemBuilder: (BuildContext context, int index) {
         if (index == models.length) {
           return SpinKitThreeBounce(
-            color: Colors.greenAccent,
+            color: Theme.of(context).accentColor,
             size: 30.0,
           );
         } else {
           return GestureDetector(
-            onTap: () {
-              onImagePressed(models[index]);
-            },
+            onTap: () => onImagePressed(models[index]),
             child: StaggeredWidget(
               models[index],
             ),

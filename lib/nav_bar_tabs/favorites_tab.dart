@@ -96,7 +96,7 @@ class FavoritesTab extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 50),
           onPressed: () => _launchURL(),
           child: Text('Sign up or log in'),
-          color: Colors.green,
+          color: Theme.of(context).accentColor,
           textColor: Colors.white,
         ))
       ],

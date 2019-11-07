@@ -69,7 +69,7 @@ class _CollectionListState extends State<CollectionList> {
             itemBuilder: (context, int index) {
               if (index == models.length) {
                 return SpinKitThreeBounce(
-                  color: Colors.greenAccent,
+                  color: Theme.of(context).accentColor,
                   size: 30.0,
                 );
               } else {

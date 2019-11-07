@@ -24,8 +24,6 @@ class MainProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
-
   removeFavorite(PhotoModel photoModel) {
     int index = _photoModelList
         .indexWhere((model) => model.photoId == photoModel.photoId);
@@ -42,18 +40,25 @@ class MainProvider extends ChangeNotifier {
     });
   }
 
+  Future refreshData() async {
+    var newList = await repository.fetchPhotos(1);
+    if (newList != null && newList.length > 0) {
+      this._photoModelList.clear();
+      this._photoModelList.addAll(newList);
+      notifyListeners();
+    }
+  }
+
   Future<List<PhotoModel>> fetchMoreData() async {
     if (!_isFetchingMore) {
       _isFetchingMore = true;
       incrementPage();
     }
 
-   _morePhotoModelList = await repository.fetchPhotos(_currentPage);
+    _morePhotoModelList = await repository.fetchPhotos(_currentPage);
     if (_morePhotoModelList.isNotEmpty) {
       _photoModelList.addAll(_morePhotoModelList);
     }
-
-   
 
     _isFetchingMore = false;
     notifyListeners();

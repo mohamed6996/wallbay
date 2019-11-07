@@ -22,6 +22,24 @@ class _SettingsTabState extends State<SettingsTab> {
             children: <Widget>[
               Padding(
                 padding: EdgeInsets.all(8.0),
+                child: Text('Theme'),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListTile(
+                  title: Text('Choose Theme'),
+                  subtitle: Text('Choose which theme to be applied.'),
+                  onTap: () async {
+                    await showDialog(
+                        context: context,
+                        builder: (context) {
+                          return PickThemeDialog(preferencesProvider);
+                        });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(8.0),
                 child: Text('Layout'),
               ),
               Padding(
@@ -139,6 +157,62 @@ class _SettingsTabState extends State<SettingsTab> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class PickThemeDialog extends StatefulWidget {
+  final PreferencesProvider preferencesProvider;
+  PickThemeDialog(this.preferencesProvider);
+  @override
+  _PickThemeDialogState createState() => _PickThemeDialogState();
+}
+
+class _PickThemeDialogState extends State<PickThemeDialog> {
+  int _radioValue = 0;
+
+  PreferencesProvider _preferencesProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _preferencesProvider = widget.preferencesProvider;
+    _radioValue = _preferencesProvider.theme;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Choose Theme'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          RadioListTile(
+              title: Text('Dark'),
+              value: 0,
+              groupValue: _radioValue,
+              onChanged: (value) {
+                setState(() {
+                  _radioValue = value;
+                  _preferencesProvider.theme = value;
+                  Navigator.of(context).pop();
+                });
+              }),
+          RadioListTile(
+              title: Text('Light'),
+              value: 1,
+              groupValue: _radioValue,
+              onChanged: (value) {
+                setState(() {
+                  _radioValue = value;
+                  _preferencesProvider.theme = value;
+                  Navigator.of(context).pop();
+                });
+              }),
+        ],
       ),
     );
   }
@@ -292,11 +366,9 @@ class _PickQualityDialogState extends State<PickQualityDialog> {
     }
   }
 
-  List<String> options=[];
+  List<String> options = [];
   List<String> downloadOptions = ['Raw', 'Full', 'Regular', 'Small'];
   List<String> loadOptions = ['Regular', 'Small'];
-
-
 
   @override
   void didChangeDependencies() {

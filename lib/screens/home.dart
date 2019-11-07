@@ -12,21 +12,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:uni_links/uni_links.dart';
 import 'package:wallbay/model/access_token.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:bottom_navy_bar/bottom_navy_bar.dart';
-import 'package:wallbay/utils/colors.dart';
 
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final PreferencesProvider preferencesProvider =
-        Provider.of<PreferencesProvider>(context);
-    return FutureBuilder(
-        future: preferencesProvider.initSharedPrefs(),
-        builder: (context, AsyncSnapshot<SharedPreferences> snapshot) {
-          if (!snapshot.hasData) return Container();
-          return MainTabs();
-        });
+    return MainTabs();
   }
 }
 
@@ -75,34 +65,36 @@ class _MainTabsState extends State<MainTabs> {
         child: currentPage,
         bucket: bucket,
       ),
-      bottomNavigationBar: BottomNavyBar(
-        showElevation: true,
-        selectedIndex: currentTab,
-        onItemSelected: (index) => setState(() {
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentTab,
+        onTap: (index) => setState(() {
           currentTab = index;
           currentPage = pages[index];
         }),
+        selectedItemColor: Colors.blueAccent,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        backgroundColor:
+            preferencesProvider.theme == 0 ? Colors.black : Colors.white,
+        type: BottomNavigationBarType.fixed,
         items: [
-          BottomNavyBarItem(
-              icon: Icon(Icons.trending_up),
-              title: Text('Trending'),
-              activeColor: kactiveColor,
-              inactiveColor: kinactiveColor),
-          BottomNavyBarItem(
-              icon: Icon(Icons.layers),
-              title: Text('Collections'),
-              activeColor: kactiveColor,
-              inactiveColor: kinactiveColor),
-          BottomNavyBarItem(
-              icon: Icon(Icons.favorite),
-              title: Text('Favorites'),
-              activeColor: kactiveColor,
-              inactiveColor: kinactiveColor),
-          BottomNavyBarItem(
-              icon: Icon(Icons.settings),
-              title: Text('Settings'),
-              activeColor: kactiveColor,
-              inactiveColor: kinactiveColor),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.trending_up),
+            title: Text('Trending'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.layers),
+            title: Text('Collections'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            title: Text('Favorites'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            title: Text('Settings'),
+          ),
         ],
       ),
     );
@@ -152,8 +144,7 @@ class _MainTabsState extends State<MainTabs> {
   Future<void> _initTabs() async {
     mainFeedTab = MainFeedTab(keyMainFeed);
     collectionsTab = CollectionsTab(keyCollections);
-    favoritesTab =
-        FavoritesTab(keyFavorites);
+    favoritesTab = FavoritesTab(keyFavorites);
     settingsTab = SettingsTab();
 
     pages = [mainFeedTab, collectionsTab, favoritesTab, settingsTab];

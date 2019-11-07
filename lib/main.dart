@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallbay/bloc/collection_provider.dart';
 import 'package:wallbay/bloc/favorite_provider.dart';
 import 'package:wallbay/bloc/main_provider.dart';
@@ -12,10 +14,13 @@ import 'package:wallbay/screens/home.dart';
 import 'bloc/coll_photos_provider.dart';
 import 'bloc/user_details_provider.dart';
 
+SharedPreferences sharedPreferences;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await intit();
+  await initSharedPref();
   await PhotoRepository.create();
 
   return runApp(MultiProvider(
@@ -28,31 +33,44 @@ void main() async {
         ChangeNotifierProvider(builder: (_) => SearchProvider()),
         ChangeNotifierProvider(builder: (_) => UserDetailsProvider()),
       ],
-      child: MaterialApp(
-        theme: buildThemeData(),
-        title: 'Wallbay',
-        debugShowCheckedModeBanner: false,
-        home: Home(),
+      child: Consumer<PreferencesProvider>(
+        builder: (context, provider, child) {
+          return MaterialApp(
+            theme: provider.theme == 0 ? darkTheme : lightTheme,
+            title: 'Wallbay',
+            home: child,
+          );
+        },
+        child: Home(),
       )));
 }
 
 intit() async {
-  var map = await  Constants.create();
-  constants.clientId = map['clientId'].replaceAll( RegExp(r'[^\w\s]+'),'');
-  constants.clientSecret = map['clientSecret'].replaceAll( RegExp(r'[^\w\s]+'),'');
-  constants.loginUrl = map['clientId'].replaceAll( RegExp(r'[^\w\s]+'),'');
+  var map = await Constants.create();
+  constants.clientId = map['clientId'].replaceAll(RegExp(r'[^\w\s]+'), '');
+  constants.clientSecret =
+      map['clientSecret'].replaceAll(RegExp(r'[^\w\s]+'), '');
+  constants.loginUrl = map['clientId'].replaceAll(RegExp(r'[^\w\s]+'), '');
 }
 
-ThemeData buildThemeData() {
-  final baseTheme = ThemeData.dark();
-
-  return baseTheme.copyWith(
-    // primaryColor: kPrimaryColor,
-    // primaryColorDark: kPrimaryDark,
-    // primaryColorLight: kPrimaryLight,
-    accentColor: Colors.greenAccent,
-    // bottomAppBarColor: kSecondaryDark,
-    //  buttonColor: kSecondaryColor,
-    bottomAppBarColor: Colors.black,
-  );
+initSharedPref() async {
+  sharedPreferences = await SharedPreferences.getInstance();
 }
+
+final darkTheme = ThemeData(
+  primaryColor: Colors.black,
+  brightness: Brightness.dark,
+  backgroundColor: Color(0xFF000000),
+  accentColor: Colors.blueAccent,
+  toggleableActiveColor: Colors.blueAccent,
+  dividerColor: Colors.black54,
+);
+
+final lightTheme = ThemeData(
+  primaryColor: Colors.white,
+  brightness: Brightness.light,
+  backgroundColor: Color(0xFFE5E5E5),
+  accentColor: Colors.blueAccent,
+  toggleableActiveColor: Colors.blueAccent,
+  dividerColor: Colors.white54,
+);

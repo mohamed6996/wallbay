@@ -19,7 +19,10 @@ class MainFeedTab extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             onPressed: () {
-              showSearch(context: context, delegate: DataSearch(),);
+              showSearch(
+                context: context,
+                delegate: DataSearch(),
+              );
             },
             tooltip: 'Search',
             icon: new Icon(Icons.search),
@@ -39,9 +42,15 @@ class MainFeedTab extends StatelessWidget {
                 } else {
                   return Consumer<MainProvider>(
                       builder: (context, provider, child) {
-                    return ImageList(
-                      models: mainProvider.photoModelList,
-                      isFavoriteTab: false,
+                    return RefreshIndicator(
+                      onRefresh: () => mainProvider.refreshData().then((_) {
+                        final snackBar = SnackBar(content: Text('Refreshed!'));
+                        Scaffold.of(context).showSnackBar(snackBar);
+                      }),
+                      child: ImageList(
+                        models: mainProvider.photoModelList,
+                        isFavoriteTab: false,
+                      ),
                     );
                   });
                 }
@@ -51,8 +60,7 @@ class MainFeedTab extends StatelessWidget {
   }
 }
 
-class DataSearch extends SearchDelegate<String>{
-  
+class DataSearch extends SearchDelegate<String> {
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -128,7 +136,7 @@ class _SearchWidgetState extends State<SearchWidget>
             case ConnectionState.waiting:
               return Center(
                   child: SpinKitHourGlass(
-                color: Colors.greenAccent,
+                color: Theme.of(context).accentColor,
               ));
               break;
             default:

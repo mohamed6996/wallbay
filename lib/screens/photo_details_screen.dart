@@ -228,7 +228,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                         builder: (context) => PhotoUserProfile(widget.model)));
                   },
                   child: Text('More Photos'),
-                  color: Colors.green,
+                  color: Theme.of(context).accentColor,
                   textColor: Colors.white,
                   padding: EdgeInsets.symmetric(horizontal: 50),
                 )
@@ -263,7 +263,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                       _launchURL();
                     },
                     child: Text('Sign up or log in'),
-                    color: Colors.green,
+                    color: Theme.of(context).accentColor,
                     textColor: Colors.white,
                   ))
                 ],

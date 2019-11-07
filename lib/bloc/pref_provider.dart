@@ -1,53 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants.dart';
+import '../main.dart';
+
 
 class PreferencesProvider extends ChangeNotifier {
-  SharedPreferences _sharedPreferences;
 
-  SharedPreferences get sharedPrefs => _sharedPreferences;
+  int get layoutType => sharedPreferences.getInt('layout') ?? 0;
 
-  int get layoutType => _sharedPreferences.getInt('layout') ?? 0;
+  set layoutType(int type) => sharedPreferences.setInt('layout', type);
 
-  set layoutType(int type) => _sharedPreferences.setInt('layout', type);
-
-  int get collectionType => _sharedPreferences.getInt('collection') ?? 0;
+  int get collectionType => sharedPreferences.getInt('collection') ?? 0;
 
   bool get isLogedIn =>
-      _sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false;
+      sharedPreferences.getBool(Constants.OAUTH_LOGED_IN) ?? false;
 
-  String get loadQuality => _sharedPreferences.getString('loadQuality') ?? 'Regular';
-  String get downloadQuality => _sharedPreferences.getString('downloadQuality')?? 'Full';
+  String get loadQuality =>
+      sharedPreferences.getString('loadQuality') ?? 'Regular';
+  String get downloadQuality =>
+      sharedPreferences.getString('downloadQuality') ?? 'Full';
+
+  int get theme => sharedPreferences.getInt('theme') ?? 0;
+  set theme(int theme) {
+    sharedPreferences.setInt('theme', theme);
+    notifyListeners();
+  }
 
   set isLogedIn(bool islogedin) {
-    _sharedPreferences.setBool(Constants.OAUTH_LOGED_IN, islogedin);
+    sharedPreferences.setBool(Constants.OAUTH_LOGED_IN, islogedin);
     notifyListeners();
   }
 
   set accessToken(String token) {
-    _sharedPreferences.setString(Constants.OAUTH_ACCESS_TOKEN, token);
+    sharedPreferences.setString(Constants.OAUTH_ACCESS_TOKEN, token);
   }
 
   set accessTokenType(String tokenType) {
-    _sharedPreferences.setString(Constants.OAUTH_TOKEN_TYPE, tokenType);
+    sharedPreferences.setString(Constants.OAUTH_TOKEN_TYPE, tokenType);
   }
 
   set collectionType(int type) {
-    _sharedPreferences.setInt('collection', type);
+    sharedPreferences.setInt('collection', type);
     notifyListeners();
   }
 
   set loadQuality(String quality) {
-    _sharedPreferences.setString('loadQuality', quality);
+    sharedPreferences.setString('loadQuality', quality);
   }
 
   set downloadQuality(String quality) {
-    _sharedPreferences.setString('downloadQuality', quality);
+    sharedPreferences.setString('downloadQuality', quality);
   }
 
-  Future<SharedPreferences> initSharedPrefs() async {
-    _sharedPreferences = await SharedPreferences.getInstance();
-    return _sharedPreferences;
-  }
+  // Future<SharedPreferences> initSharedPrefs() async {
+  //   sharedPreferences = await SharedPreferences.getInstance();
+  //   return sharedPreferences;
+  // }
 }

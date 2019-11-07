@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wallbay/bloc/user_details_provider.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/widgets/image_list.dart';
-
 
 class PhotoUserProfile extends StatefulWidget {
   PhotoUserProfile(this.model);
@@ -50,10 +48,7 @@ class _PhotoUserProfileState extends State<PhotoUserProfile>
             builder: (context, snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return Center(
-                      child: SpinKitHourGlass(
-                    color: Colors.deepOrange,
-                  ));
+                  return Center(child: CircularProgressIndicator());
                   break;
                 default:
                   if (snapshot.hasError) {
