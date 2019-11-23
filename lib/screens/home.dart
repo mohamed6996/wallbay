@@ -80,7 +80,7 @@ class _MainTabsState extends State<MainTabs> {
         type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.trending_up),
+            icon: Icon(Icons.explore),
             title: Text('Trending'),
           ),
           BottomNavigationBarItem(

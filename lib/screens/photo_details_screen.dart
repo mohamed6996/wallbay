@@ -104,7 +104,10 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.black,
-      appBar: AppBar(backgroundColor: Colors.transparent),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
       body: Center(
         child: PhotoView(
           heroTag: widget.model.photoId,
@@ -218,7 +221,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                 Padding(padding: EdgeInsets.all(8)),
                 Text(
                   '${widget.model.bio == null ? "" : widget.model.bio}',
-                  //   textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white),
+                  //   textAlign: TextAlign.center,F
                 ),
                 Padding(padding: EdgeInsets.all(12)),
                 FlatButton(

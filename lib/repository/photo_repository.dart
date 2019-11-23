@@ -49,7 +49,6 @@ class PhotoRepository extends Repository {
       photosUrl = Constants.BASE_URL + "photos/?page=$pageNumber&per_page=$_perPage";
       Options options = new Options();
       options.headers = map;
-
       var response = await _dio.get(photosUrl, options: options);
       list = PhotoResponseList.fromJson(response.data);
     } else {

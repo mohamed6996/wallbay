@@ -52,8 +52,5 @@ class PreferencesProvider extends ChangeNotifier {
     sharedPreferences.setString('downloadQuality', quality);
   }
 
-  // Future<SharedPreferences> initSharedPrefs() async {
-  //   sharedPreferences = await SharedPreferences.getInstance();
-  //   return sharedPreferences;
-  // }
+  
 }

@@ -6,6 +6,7 @@ import 'package:wallbay/bloc/favorite_provider.dart';
 import 'package:wallbay/bloc/pref_provider.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
+import 'package:wallbay/utils/connectivity_checker.dart';
 import 'package:wallbay/widgets/image_list.dart';
 
 import '../constants.dart';
@@ -35,8 +36,14 @@ class FavoritesTab extends StatelessWidget {
                   default:
                     if (userNameSnapshot.hasError) {
                       return Center(
-                          child: Text("Error: ${userNameSnapshot.error}"));
-                    } else {
+                          child: Text("Check your internet connection!"));
+                    }
+
+                    // if (userNameSnapshot.data == null)
+                    //   return Center(
+                    //     child: Text('Check your network connection!'),
+                    //   );
+                    else {
                       return FutureBuilder(
                           future: favoriteProvider
                               .fetchData(userNameSnapshot.data.username),
@@ -51,7 +58,13 @@ class FavoritesTab extends StatelessWidget {
                                 if (snapshot.hasError) {
                                   return Center(
                                       child: Text("Error: ${snapshot.error}"));
-                                } else {
+                                } else if (favoriteProvider
+                                        .photoModelList.length ==
+                                    0)
+                                  return Center(
+                                    child: Text('Your favorite list is empty!'),
+                                  );
+                                else {
                                   return Consumer<FavoriteProvider>(
                                       builder: (context, provider, child) {
                                     return ImageList(
@@ -75,6 +88,12 @@ class FavoritesTab extends StatelessWidget {
     return _meMemoizer.runOnce(() async {
       return await repository.getMe();
     });
+    // bool status = await checkConnectivity();
+    // if (status) {
+    //   return _meMemoizer.runOnce(() async {
+    //     return await repository.getMe();
+    //   });
+    // }
   }
 
   Widget _login(BuildContext context) {
@@ -104,7 +123,7 @@ class FavoritesTab extends StatelessWidget {
   }
 
   _launchURL() async {
-    var loginUrl =constants.loginUrl;
+    var loginUrl = constants.loginUrl;
     if (await canLaunch(loginUrl)) {
       await launch(loginUrl);
     } else {

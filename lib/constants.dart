@@ -10,8 +10,13 @@ class Constants {
   static Future<Map<String, String>> create() async {
     instance = Constants._();
     final RemoteConfig remoteConfig = await RemoteConfig.instance;
-    await remoteConfig.fetch(expiration: const Duration(hours: 5));
-    await remoteConfig.activateFetched();
+
+    try {
+      await remoteConfig.fetch(expiration: const Duration(hours: 5));
+      await remoteConfig.activateFetched();
+    } catch (e) {
+      print(e.toString());
+    }
 
     String clientId = remoteConfig.getString('clientId');
     String clientSecret = remoteConfig.getString('clientSecret');
@@ -39,18 +44,17 @@ class Constants {
     this._clientSecret = val;
   }
 
-  set loginUrl(String clientId){
-    _loginUrl =  "https://unsplash.com/oauth/authorize" +
-      "?client_id=" +
-       clientId +
-      "&redirect_uri=" +
-      redirectURI +
-      "&response_type=" +
-      "code" +
-      "&scope=" +
-      "public+read_user+write_user+read_photos+write_photos+write_likes+read_collections+write_collections";
+  set loginUrl(String clientId) {
+    _loginUrl = "https://unsplash.com/oauth/authorize" +
+        "?client_id=" +
+        clientId +
+        "&redirect_uri=" +
+        redirectURI +
+        "&response_type=" +
+        "code" +
+        "&scope=" +
+        "public+read_user+write_user+read_photos+write_photos+write_likes+read_collections+write_collections";
   }
-
 
   static final BASE_URL = "https://api.unsplash.com/";
 

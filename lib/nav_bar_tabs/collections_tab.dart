@@ -12,7 +12,7 @@ class CollectionsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     PreferencesProvider preferencesProvider =
-        Provider.of<PreferencesProvider>(context,listen: false);
+        Provider.of<PreferencesProvider>(context, listen: false);
     CollectionProvider collectionProvider =
         Provider.of<CollectionProvider>(context, listen: false);
 
@@ -34,13 +34,12 @@ class CollectionsTab extends StatelessWidget {
           )
         ],
       ),
-  
       body: Consumer<PreferencesProvider>(
         builder: (context, prefs, child) {
           return FutureBuilder(
-              future: prefs.collectionType ==0 ?  collectionProvider
-                  .fetchData() :collectionProvider
-                  .fetchWallPaper(),
+              future: prefs.collectionType == 0
+                  ? collectionProvider.fetchData()
+                  : collectionProvider.fetchWallPaper(),
               builder:
                   (context, AsyncSnapshot<List<CollectionModel>> snapshot) {
                 switch (snapshot.connectionState) {
@@ -49,7 +48,8 @@ class CollectionsTab extends StatelessWidget {
                     break;
                   default:
                     if (snapshot.hasError) {
-                      return Center(child: Text("Error: ${snapshot.error}"));
+                      return Center(
+                          child: Text("Check your internet connection!"));
                     } else {
                       return Consumer<CollectionProvider>(
                           builder: (context, provider, child) {
@@ -64,8 +64,6 @@ class CollectionsTab extends StatelessWidget {
       ),
     );
   }
-
-  
 }
 
 class FilterCollection extends StatefulWidget {
@@ -81,12 +79,12 @@ class _FilterCollectionState extends State<FilterCollection> {
   @override
   Widget build(BuildContext context) {
     return DropdownButton<String>(
-        iconEnabledColor: Colors.white,
+        // iconEnabledColor: Colors.white,
         underline: Container(),
         isExpanded: false,
         isDense: true,
         hint: null,
-        icon: Icon(Icons.filter_list, color: Colors.white),
+        icon: Icon(Icons.filter_list),
         items: [
           DropdownMenuItem(
             value: 'All',

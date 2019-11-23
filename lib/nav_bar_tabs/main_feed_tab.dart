@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:wallbay/bloc/main_provider.dart';
 import 'package:wallbay/bloc/search_provider.dart';
 import 'package:wallbay/model/photo_model.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:wallbay/widgets/image_list.dart';
 
 class MainFeedTab extends StatelessWidget {
@@ -13,6 +12,8 @@ class MainFeedTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final MainProvider mainProvider =
         Provider.of<MainProvider>(context, listen: false);
+
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Wallbay'),
@@ -38,8 +39,22 @@ class MainFeedTab extends StatelessWidget {
                 break;
               default:
                 if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
-                } else {
+                  return Center(child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text("Check your internet connection!"),
+                      // FlatButton(
+                      //   color: Theme.of(context).accentColor,
+                      //   child: Text('Try again'),
+                      // onPressed: ()async{
+                      // await  mainProvider.refreshData();
+                      
+                      // },)
+                    ],
+                  ));
+                }
+               
+                else {
                   return Consumer<MainProvider>(
                       builder: (context, provider, child) {
                     return RefreshIndicator(
@@ -134,10 +149,7 @@ class _SearchWidgetState extends State<SearchWidget>
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
-              return Center(
-                  child: SpinKitHourGlass(
-                color: Theme.of(context).accentColor,
-              ));
+              return Center(child: CircularProgressIndicator());
               break;
             default:
               if (snapshot.hasError) {

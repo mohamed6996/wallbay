@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wallbay/model/collection_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:async/async.dart';
+import 'package:wallbay/utils/connectivity_checker.dart';
 
 class CollectionProvider extends ChangeNotifier {
   final _allMemoizer = AsyncMemoizer<List<CollectionModel>>();
@@ -13,8 +14,8 @@ class CollectionProvider extends ChangeNotifier {
   List<CollectionModel> _photoModelList = [];
   List<CollectionModel> _wallModelList = [];
 
-  List<CollectionModel> _morePhotoModelList;
-  List<CollectionModel> _moreWall;
+  List<CollectionModel> _morePhotoModelList = [];
+  List<CollectionModel> _moreWall = [];
 
   List<CollectionModel> get photoModelList => _photoModelList;
 
@@ -27,17 +28,33 @@ class CollectionProvider extends ChangeNotifier {
   }
 
   Future<List<CollectionModel>> fetchData() async {
-    return _allMemoizer.runOnce(() async {
-      _photoModelList = await repository.fetchCollections(1);
-      return _photoModelList;
-    });
+      return _allMemoizer.runOnce(() async {
+        _photoModelList = await repository.fetchCollections(1);
+        return _photoModelList;
+      });
+    // bool status = await checkConnectivity();
+    // if (status) {
+    //   return _allMemoizer.runOnce(() async {
+    //     _photoModelList = await repository.fetchCollections(1);
+    //     return _photoModelList;
+    //   });
+    // }
+    // return _photoModelList;
   }
 
-  Future<List<CollectionModel>> fetchWallPaper() {
-    return _wallpaperMemoizer.runOnce(() async {
-      _wallModelList = await repository.searchCollections(1);
-      return _wallModelList;
-    });
+  Future<List<CollectionModel>> fetchWallPaper() async {
+     return _wallpaperMemoizer.runOnce(() async {
+        _wallModelList = await repository.searchCollections(1);
+        return _wallModelList;
+      });
+    // bool status = await checkConnectivity();
+    // if (status) {
+    //   return _wallpaperMemoizer.runOnce(() async {
+    //     _wallModelList = await repository.searchCollections(1);
+    //     return _wallModelList;
+    //   });
+    // }
+    // return _wallModelList;
   }
 
   Future<List<CollectionModel>> fetchMoreData(int collectionType) async {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wallbay/model/photo_model.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:async/async.dart';
+import 'package:wallbay/utils/connectivity_checker.dart';
 
 class MainProvider extends ChangeNotifier {
   final _memoizer = AsyncMemoizer<List<PhotoModel>>();
@@ -10,8 +11,8 @@ class MainProvider extends ChangeNotifier {
   bool _isFetching = false;
   bool _isFetchingMore = false;
 
-  List<PhotoModel> _photoModelList;
-  List<PhotoModel> _morePhotoModelList;
+  List<PhotoModel> _photoModelList = [];
+  List<PhotoModel> _morePhotoModelList = [];
 
   List<PhotoModel> get photoModelList => _photoModelList;
   bool get isFetching => _isFetching;
@@ -34,13 +35,26 @@ class MainProvider extends ChangeNotifier {
   }
 
   Future<List<PhotoModel>> fetchData() async {
-    return _memoizer.runOnce(() async {
-      this._photoModelList = await repository.fetchPhotos(1);
-      return _photoModelList;
-    });
+
+      return _memoizer.runOnce(() async {
+        this._photoModelList = await repository.fetchPhotos(1);
+        return _photoModelList;
+      });
+
+
+    // bool status = await checkConnectivity();
+    // if (status) {
+    //   return _memoizer.runOnce(() async {
+    //     this._photoModelList = await repository.fetchPhotos(1);
+    //     return _photoModelList;
+    //   });
+    // }
+    // return _photoModelList;
   }
 
   Future refreshData() async {
+    // bool status = await checkConnectivity();
+    // if (!status) return;
     var newList = await repository.fetchPhotos(1);
     if (newList != null && newList.length > 0) {
       this._photoModelList.clear();

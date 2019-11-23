@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallbay/bloc/collection_provider.dart';
@@ -10,6 +9,7 @@ import 'package:wallbay/bloc/search_provider.dart';
 import 'package:wallbay/constants.dart';
 import 'package:wallbay/repository/photo_repository.dart';
 import 'package:wallbay/screens/home.dart';
+import 'package:wallbay/utils/connectivity_service.dart';
 
 import 'bloc/coll_photos_provider.dart';
 import 'bloc/user_details_provider.dart';
@@ -22,6 +22,7 @@ void main() async {
   await intit();
   await initSharedPref();
   await PhotoRepository.create();
+  //ConnectivityService();
 
   return runApp(MultiProvider(
       providers: [
@@ -32,11 +33,12 @@ void main() async {
         ChangeNotifierProvider(builder: (_) => CollPhotosProvider()),
         ChangeNotifierProvider(builder: (_) => SearchProvider()),
         ChangeNotifierProvider(builder: (_) => UserDetailsProvider()),
+        //ChangeNotifierProvider(builder: (_) => ConnectivityService()),
       ],
       child: Consumer<PreferencesProvider>(
         builder: (context, provider, child) {
           return MaterialApp(
-            theme: provider.theme == 0 ? darkTheme : lightTheme,
+            theme: provider.theme == 0 ? _buildDarkTheme() : _buildLightTheme(),
             title: 'Wallbay',
             home: child,
           );
@@ -57,20 +59,39 @@ initSharedPref() async {
   sharedPreferences = await SharedPreferences.getInstance();
 }
 
-final darkTheme = ThemeData(
-  primaryColor: Colors.black,
-  brightness: Brightness.dark,
-  backgroundColor: Color(0xFF000000),
-  accentColor: Colors.blueAccent,
-  toggleableActiveColor: Colors.blueAccent,
-  dividerColor: Colors.black54,
-);
+ThemeData _buildDarkTheme() {
+  return ThemeData.dark().copyWith(
+    accentColor: Colors.blueAccent,
+    toggleableActiveColor: Colors.blueAccent,
+    appBarTheme: AppBarTheme(
+      textTheme: TextTheme(
+          title: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.w300,
+              fontFamily: 'Lobster')),
+    ),
+  );
+}
 
-final lightTheme = ThemeData(
-  primaryColor: Colors.white,
-  brightness: Brightness.light,
-  backgroundColor: Color(0xFFE5E5E5),
-  accentColor: Colors.blueAccent,
-  toggleableActiveColor: Colors.blueAccent,
-  dividerColor: Colors.white54,
-);
+ThemeData _buildLightTheme() {
+  return ThemeData.light().copyWith(
+    primaryColor: Colors.white,
+    primaryTextTheme: TextTheme(title: TextStyle(color: Colors.black)),
+    primaryIconTheme: IconThemeData(color: Colors.black),
+    appBarTheme: AppBarTheme(
+      color: Colors.white,
+      actionsIconTheme: IconThemeData(
+        color: Colors.black,
+      ),
+      textTheme: TextTheme(
+          title: TextStyle(
+              color: Colors.black,
+              fontSize: 24,
+              fontWeight: FontWeight.w300,
+              fontFamily: 'Lobster')),
+    ),
+    accentColor: Colors.blueAccent,
+    toggleableActiveColor: Colors.blueAccent,
+  );
+}

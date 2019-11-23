@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wallbay/bloc/pref_provider.dart';
 
 class SettingsTab extends StatefulWidget {
@@ -8,6 +10,9 @@ class SettingsTab extends StatefulWidget {
 }
 
 class _SettingsTabState extends State<SettingsTab> {
+  String get appUrl =>
+      'https://play.google.com/store/apps/details?id=com.wallpaper.wallbay';
+
   @override
   Widget build(BuildContext context) {
     PreferencesProvider preferencesProvider =
@@ -52,25 +57,6 @@ class _SettingsTabState extends State<SettingsTab> {
                         context: context,
                         builder: (context) {
                           return PickTypeDialog(preferencesProvider);
-                        });
-                  },
-                ),
-              ),
-              Divider(),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text('Collection'),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ListTile(
-                  title: Text('Default Collection'),
-                  subtitle: Text('Choose which collection to show.'),
-                  onTap: () async {
-                    await showDialog(
-                        context: context,
-                        builder: (context) {
-                          return CollectionType(preferencesProvider);
                         });
                   },
                 ),
@@ -133,23 +119,39 @@ class _SettingsTabState extends State<SettingsTab> {
                     ListTile(
                       title: Text('Recommend'),
                       subtitle: Text('Share this app with friends and family.'),
-                      onTap: () {},
+                      onTap: () {
+                        Share.share(
+                            'Hey! Check out Wallbay its pretty cool! $appUrl');
+                      },
                     ),
                     ListTile(
                       title: Text('Rate app'),
                       subtitle:
                           Text('Leave an honest review on Google Play Store.'),
-                      onTap: () {},
+                      onTap: () {
+                        launch(appUrl);
+                      },
                     ),
                     ListTile(
                       title: Text('Feedback'),
                       subtitle: Text(
                           'Tell me what do you think and help me to improve the app.'),
-                      onTap: () {},
+                      onTap: () {
+                        launch(
+                            "mailto:mohamed.ali6996@hotmail.com?subject=Wallbay Feedback");
+                      },
+                    ),
+                    SizedBox(
+                      height: 8,
                     ),
                     ListTile(
                       title: Text('Logout'),
-                      onTap: () => preferencesProvider.isLogedIn = false,
+                      onTap: () {
+                        preferencesProvider.isLogedIn = false;
+                        final snackBar = SnackBar(content: Text('Loged out successfully!'));
+                        Scaffold.of(context).showSnackBar(snackBar);
+                      },
+                      trailing: Icon(Icons.exit_to_app),
                     ),
                   ],
                 ),
@@ -279,63 +281,6 @@ class _PickTypeDialogState extends State<PickTypeDialog> {
                   _radioValue = value;
                   _mainProvider.layoutType = value;
                   //SharedPrefs.saveLayout(value);
-                  Navigator.of(context).pop();
-                });
-              }),
-        ],
-      ),
-    );
-  }
-}
-
-class CollectionType extends StatefulWidget {
-  final PreferencesProvider mainProvider;
-  CollectionType(this.mainProvider);
-  @override
-  _CollectionTypeState createState() => _CollectionTypeState();
-}
-
-class _CollectionTypeState extends State<CollectionType> {
-  int _radioValue = 0;
-  PreferencesProvider _mainProvider;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _mainProvider = widget.mainProvider;
-    _radioValue = _mainProvider.collectionType;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Show me'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          RadioListTile(
-              title: Text('All'),
-              value: 0,
-              groupValue: _radioValue,
-              onChanged: (value) {
-                setState(() {
-                  _radioValue = value;
-                  _mainProvider.collectionType = value;
-                  //SharedPrefs.saveCollection(value);
-                  Navigator.of(context).pop();
-                });
-              }),
-          RadioListTile(
-              title: Text('Wallpaper'),
-              value: 1,
-              groupValue: _radioValue,
-              onChanged: (value) {
-                setState(() {
-                  _radioValue = value;
-                  _mainProvider.collectionType = value;
-                  // SharedPrefs.saveCollection(value);
                   Navigator.of(context).pop();
                 });
               }),
